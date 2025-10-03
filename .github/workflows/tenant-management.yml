@@ -1,0 +1,95 @@
+name: SaaS Tenant Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Ação para executar'
+        required: true
+        type: choice
+        options:
+          - create-tenant
+          - update-tenant
+          - delete-tenant
+          - list-tenants
+          - tenant-backup
+          - tenant-restore
+      tenant_name:
+        description: 'Nome do tenant (ex: empresa-cliente)'
+        required: false
+      tenant_domain:
+        description: 'Domínio personalizado (ex: cliente.aviladevops.com.br)'
+        required: false
+
+jobs:
+  manage-tenant:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install requests python-dotenv
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Create tenant
+      if: github.event.inputs.action == 'create-tenant'
+      run: |
+        python scripts/tenant_management.py create \
+          --name "${{ github.event.inputs.tenant_name }}" \
+          --domain "${{ github.event.inputs.tenant_domain }}"
+
+    - name: Update tenant
+      if: github.event.inputs.action == 'update-tenant'
+      run: |
+        python scripts/tenant_management.py update \
+          --name "${{ github.event.inputs.tenant_name }}" \
+          --domain "${{ github.event.inputs.tenant_domain }}"
+
+    - name: Delete tenant
+      if: github.event.inputs.action == 'delete-tenant'
+      run: |
+        python scripts/tenant_management.py delete \
+          --name "${{ github.event.inputs.tenant_name }}"
+
+    - name: List tenants
+      if: github.event.inputs.action == 'list-tenants'
+      run: |
+        python scripts/tenant_management.py list
+
+    - name: Backup tenant
+      if: github.event.inputs.action == 'tenant-backup'
+      run: |
+        python scripts/tenant_management.py backup \
+          --name "${{ github.event.inputs.tenant_name }}"
+
+    - name: Restore tenant
+      if: github.event.inputs.action == 'tenant-restore'
+      run: |
+        python scripts/tenant_management.py restore \
+          --name "${{ github.event.inputs.tenant_name }}"
+
+  notify-tenant-action:
+    runs-on: ubuntu-latest
+    needs: manage-tenant
+    if: always()
+
+    steps:
+    - name: Send notification
+      run: |
+        echo "Tenant management action completed: ${{ github.event.inputs.action }}"
+        # Send notification to admin or logging system

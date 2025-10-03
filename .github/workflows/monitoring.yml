@@ -1,0 +1,131 @@
+name: SaaS Monitoring and Alerts
+
+on:
+  schedule:
+    # Run every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    name: Health Check All Services
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install requests
+
+    - name: Check services health
+      run: |
+        python scripts/health_check.py
+
+    - name: Check database connectivity
+      run: |
+        python scripts/db_health_check.py
+
+    - name: Check SSL certificates
+      run: |
+        python scripts/ssl_check.py
+
+  performance-monitoring:
+    name: Performance Monitoring
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install monitoring tools
+      run: |
+        npm install -g lighthouse lighthouse-ci
+
+    - name: Run performance tests
+      run: |
+        python scripts/performance_monitor.py
+
+    - name: Generate performance report
+      run: |
+        python scripts/generate_report.py
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    schedule:
+      # Run daily at 2 AM
+      - cron: '0 2 * * *'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run security scan
+      uses: securecodewarrior/github-action-gosec@master
+      with:
+        args: './...'
+
+    - name: Run dependency vulnerability scan
+      run: |
+        python scripts/security_scan.py
+
+    - name: Check for exposed secrets
+      run: |
+        python scripts/secret_scan.py
+
+  backup-monitoring:
+    name: Backup Monitoring
+    runs-on: ubuntu-latest
+    schedule:
+      # Run daily at 3 AM
+      - cron: '0 3 * * *'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check backup status
+      run: |
+        python scripts/backup_monitor.py
+
+    - name: Verify backup integrity
+      run: |
+        python scripts/backup_verify.py
+
+    - name: Generate backup report
+      run: |
+        python scripts/backup_report.py
+
+  alert-system:
+    name: Alert System
+    runs-on: ubuntu-latest
+    needs: [health-check, performance-monitoring, security-scan, backup-monitoring]
+    if: failure()
+
+    steps:
+    - name: Send alert to team
+      run: |
+        python scripts/send_alert.py \
+          --service "SaaS Platform" \
+          --severity "high" \
+          --message "Automated monitoring detected issues"
+
+    - name: Create incident ticket
+      run: |
+        python scripts/create_incident.py
+
+    - name: Escalate to on-call engineer
+      run: |
+        python scripts/escalate_incident.py
