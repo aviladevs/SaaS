@@ -1,0 +1,11 @@
+{
+  "host": "SEU_IP_CLOUD_SQL",
+  "user": "seu_usuario",
+  "password": "sua_senha",
+  "database": "nome_do_banco",
+  "port": 3306,
+  "diretorios": {
+    "nfe": "./NFe",
+    "cte": "./CTe"
+  }
+}

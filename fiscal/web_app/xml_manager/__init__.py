@@ -1,0 +1,1 @@
+# Django XML Manager

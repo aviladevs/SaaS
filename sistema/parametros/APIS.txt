@@ -1,0 +1,12 @@
+APIS 
+https://www.nfe.fazenda.gov.br/portal/principal.aspx
+https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/rtc
+https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-em-homologacao
+https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/leiaute-e-esquemas-atuais
+https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/tabelas-de-dominio
+https://servicosgovbr.github.io/
+https://nfce.encat.org/desenvolvedor/manuais/
+https://brasilapi.com.br/docs
+https://codigosimples.net/2025/02/28/30-apis-gratuitas-para-desenvolvedores/
+https://medium.com/reactbrasil/10-apis-gr%C3%A1tis-e-legais-para-voc%C3%AA-consumir-69141988ea0b
+https://openapi.alibaba.com/doc/api.htm

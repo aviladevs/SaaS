@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Resultado da Consulta - XML Manager{% endblock %}
+
+{% block content %}
+<div class="fade-in-up">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% url 'certificados_list' %}" class="text-sky-400 hover:text-sky-300 mb-4 inline-block">
+            <i class="bi bi-arrow-left mr-2"></i>
+            Voltar para Certificados
+        </a>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">
+                    <i class="bi bi-search text-sky-400 mr-3"></i>
+                    Resultado da Consulta
+                </h1>
+                <p class="text-gray-400">
+                    {{ consulta.tipo_documento }} - {{ consulta.data_inicio|date:"d/m/Y" }} até {{ consulta.data_fim|date:"d/m/Y" }}
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                {% if consulta.status == 'CONCLUIDA' %}
+                <span class="px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold">
+                    <i class="bi bi-check-circle mr-1"></i>
+                    Concluída
+                </span>
+                {% elif consulta.status == 'PROCESSANDO' %}
+                <span class="px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-semibold">
+                    <i class="bi bi-hourglass-split mr-1"></i>
+                    Processando...
+                </span>
+                {% elif consulta.status == 'ERRO' %}
+                <span class="px-4 py-2 bg-red-100 text-red-700 rounded-full font-semibold">
+                    <i class="bi bi-x-circle mr-1"></i>
+                    Erro
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="glass-white rounded-xl p-4">
+            <div class="text-3xl font-bold text-sky-600 mb-1">{{ stats.total }}</div>
+            <div class="text-sm text-gray-600">Total Encontrados</div>
+        </div>
+        <div class="glass-white rounded-xl p-4">
+            <div class="text-3xl font-bold text-green-600 mb-1">{{ stats.importados }}</div>
+            <div class="text-sm text-gray-600">Importados</div>
+        </div>
+        <div class="glass-white rounded-xl p-4">
+            <div class="text-3xl font-bold text-orange-600 mb-1">{{ stats.pendentes }}</div>
+            <div class="text-sm text-gray-600">Pendentes</div>
+        </div>
+        <div class="glass-white rounded-xl p-4">
+            <div class="text-3xl font-bold text-purple-600 mb-1">{{ consulta.data_consulta|date:"H:i" }}</div>
+            <div class="text-sm text-gray-600">Horário</div>
+        </div>
+    </div>
+
+    <!-- Abas de Papéis -->
+    <div class="glass-white rounded-2xl p-6" x-data="{ activeTab: 'emitente' }">
+        <!-- Tab Headers -->
+        <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
+            <button @click="activeTab = 'emitente'" 
+                    :class="activeTab === 'emitente' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                    class="px-4 py-2 rounded-lg font-semibold transition-colors btn-mobile">
+                <i class="bi bi-building mr-2"></i>
+                Emitente
+                <span class="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">{{ stats.emitente }}</span>
+            </button>
+            
+            <button @click="activeTab = 'destinatario'" 
+                    :class="activeTab === 'destinatario' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                    class="px-4 py-2 rounded-lg font-semibold transition-colors btn-mobile">
+                <i class="bi bi-person-check mr-2"></i>
+                Destinatário
+                <span class="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">{{ stats.destinatario }}</span>
+            </button>
+            
+            <button @click="activeTab = 'transportador'" 
+                    :class="activeTab === 'transportador' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                    class="px-4 py-2 rounded-lg font-semibold transition-colors btn-mobile">
+                <i class="bi bi-truck mr-2"></i>
+                Transportador
+                <span class="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">{{ stats.transportador }}</span>
+            </button>
+            
+            <button @click="activeTab = 'tomador'" 
+                    :class="activeTab === 'tomador' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                    class="px-4 py-2 rounded-lg font-semibold transition-colors btn-mobile">
+                <i class="bi bi-person-badge mr-2"></i>
+                Tomador
+                <span class="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">{{ stats.tomador }}</span>
+            </button>
+            
+            <button @click="activeTab = 'remetente'" 
+                    :class="activeTab === 'remetente' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                    class="px-4 py-2 rounded-lg font-semibold transition-colors btn-mobile">
+                <i class="bi bi-send mr-2"></i>
+                Remetente
+                <span class="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">{{ stats.remetente }}</span>
+            </button>
+            
+            <button @click="activeTab = 'recebedor'" 
+                    :class="activeTab === 'recebedor' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                    class="px-4 py-2 rounded-lg font-semibold transition-colors btn-mobile">
+                <i class="bi bi-inbox mr-2"></i>
+                Recebedor
+                <span class="ml-2 px-2 py-1 bg-white/20 rounded-full text-xs">{{ stats.recebedor }}</span>
+            </button>
+        </div>
+
+        <!-- Tab Content - Emitente -->
+        <div x-show="activeTab === 'emitente'" x-transition>
+            {% include 'core/partials/documentos_table.html' with documentos=docs_emitente papel="Emitente" %}
+        </div>
+
+        <!-- Tab Content - Destinatário -->
+        <div x-show="activeTab === 'destinatario'" x-transition>
+            {% include 'core/partials/documentos_table.html' with documentos=docs_destinatario papel="Destinatário" %}
+        </div>
+
+        <!-- Tab Content - Transportador -->
+        <div x-show="activeTab === 'transportador'" x-transition>
+            {% include 'core/partials/documentos_table.html' with documentos=docs_transportador papel="Transportador" %}
+        </div>
+
+        <!-- Tab Content - Tomador -->
+        <div x-show="activeTab === 'tomador'" x-transition>
+            {% include 'core/partials/documentos_table.html' with documentos=docs_tomador papel="Tomador" %}
+        </div>
+
+        <!-- Tab Content - Remetente -->
+        <div x-show="activeTab === 'remetente'" x-transition>
+            {% include 'core/partials/documentos_table.html' with documentos=docs_remetente papel="Remetente" %}
+        </div>
+
+        <!-- Tab Content - Recebedor -->
+        <div x-show="activeTab === 'recebedor'" x-transition>
+            {% include 'core/partials/documentos_table.html' with documentos=docs_recebedor papel="Recebedor" %}
+        </div>
+    </div>
+
+    <!-- Ações em Massa -->
+    <div class="mt-6 glass-white rounded-2xl p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">
+            <i class="bi bi-lightning text-sky-600 mr-2"></i>
+            Ações em Massa
+        </h3>
+        <div class="flex flex-wrap gap-3">
+            <button onclick="importarTodos()" 
+                    class="px-6 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-colors btn-mobile">
+                <i class="bi bi-download mr-2"></i>
+                Importar Todos
+            </button>
+            <button onclick="exportarCSV()" 
+                    class="px-6 py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors btn-mobile">
+                <i class="bi bi-file-earmark-spreadsheet mr-2"></i>
+                Exportar CSV
+            </button>
+            <button onclick="baixarXMLs()" 
+                    class="px-6 py-3 bg-purple-500 text-white rounded-xl font-semibold hover:bg-purple-600 transition-colors btn-mobile">
+                <i class="bi bi-file-earmark-zip mr-2"></i>
+                Baixar XMLs (ZIP)
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function importarDocumento(docId) {
+    if (!confirm('Deseja importar este documento para o sistema?')) return;
+    
+    fetch(`/api/documento/${docId}/importar/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            alert('Documento importado com sucesso!');
+            location.reload();
+        } else {
+            alert('Erro: ' + data.erro);
+        }
+    });
+}
+
+function importarTodos() {
+    if (!confirm('Deseja importar TODOS os documentos encontrados?')) return;
+    
+    // Implementar importação em massa
+    alert('Importação em massa iniciada! Aguarde...');
+}
+
+function exportarCSV() {
+    window.location.href = `/api/consulta/{{ consulta.id }}/exportar-csv/`;
+}
+
+function baixarXMLs() {
+    window.location.href = `/api/consulta/{{ consulta.id }}/baixar-xmls/`;
+}
+</script>
+{% endblock %}
