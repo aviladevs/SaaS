@@ -1,0 +1,54 @@
+version: 2
+updates:
+  # Python packages for Django projects
+  - package-ecosystem: "pip"
+    directory: "/LANDING-PAGE"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "@aviladevops"
+    assignees:
+      - "@aviladevops"
+
+  - package-ecosystem: "pip"
+    directory: "/sistema"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "@aviladevops"
+    assignees:
+      - "@aviladevops"
+
+  - package-ecosystem: "pip"
+    directory: "/fiscal"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "@aviladevops"
+    assignees:
+      - "@aviladevops"
+
+  # Node.js packages for Next.js project
+  - package-ecosystem: "npm"
+    directory: "/clinica"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "@aviladevops"
+    assignees:
+      - "@aviladevops"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "@aviladevops"
+    assignees:
+      - "@aviladevops"
