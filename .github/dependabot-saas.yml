@@ -1,0 +1,108 @@
+version: 2
+updates:
+  # Python packages - Landing Page
+  - package-ecosystem: "pip"
+    directory: "/LANDING-PAGE"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "@aviladevops/landing-page-team"
+    assignees:
+      - "@aviladevops/devops-team"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # Python packages - Sistema
+  - package-ecosystem: "pip"
+    directory: "/sistema"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "@aviladevops/sistema-team"
+    assignees:
+      - "@aviladevops/devops-team"
+
+  # Python packages - Fiscal
+  - package-ecosystem: "pip"
+    directory: "/fiscal"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "@aviladevops/fiscal-team"
+    assignees:
+      - "@aviladevops/devops-team"
+
+  # Node.js packages - Clínica
+  - package-ecosystem: "npm"
+    directory: "/clinica"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "@aviladevops/clinica-team"
+    assignees:
+      - "@aviladevops/frontend-team"
+
+  # Python packages - App Principal
+  - package-ecosystem: "pip"
+    directory: "/app-aviladevops"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+    open-pull-requests-limit: 15
+    reviewers:
+      - "@aviladevops/backend-team"
+    assignees:
+      - "@aviladevops/devops-team"
+
+  # Docker base images
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "@aviladevops/devops-team"
+    assignees:
+      - "@aviladevops/devops-team"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "first"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "@aviladevops/devops-team"
+    assignees:
+      - "@aviladevops/devops-team"
+
+  # Terraform providers
+  - package-ecosystem: "terraform"
+    directory: "/terraform"
+    schedule:
+      interval: "monthly"
+      day: "first"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "@aviladevops/devops-team"
+    assignees:
+      - "@aviladevops/devops-team"

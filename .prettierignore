@@ -1,0 +1,52 @@
+# Arquivos e diretórios ignorados pelo Prettier
+
+# Dependências
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Arquivos estáticos
+static/
+public/
+
+# Arquivos de configuração
+.env*
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de migração Django
+**/migrations/__pycache__/
+
+# Arquivos de cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Arquivos de cobertura
+coverage/
+.coverage
+
+# Arquivos de documentação gerados
+docs/build/
+*.pdf
+
+# Arquivos de backup
+*.bak
+*.backup
+
+# Arquivos específicos do projeto
+db.sqlite3
+media/
+staticfiles/
