@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class ContactMessage(models.Model):
@@ -48,7 +48,7 @@ class ContactMessage(models.Model):
 
     # Relacionamentos
     assigned_to = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -99,7 +99,7 @@ class ContactNote(models.Model):
     )
 
     author = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='contact_notes',
         verbose_name=_('Autor')

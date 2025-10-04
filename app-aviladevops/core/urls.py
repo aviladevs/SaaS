@@ -23,12 +23,13 @@ from django.shortcuts import redirect
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('apps.api.urls')),
+    path('api/auth/', include('apps.users.urls')),  # Multi-tenant auth endpoints
     path('dashboard/', include('apps.dashboard.urls')),
     path('services/', include('apps.services.urls')),
     path('portfolio/', include('apps.portfolio.urls')),
     path('blog/', include('apps.blog.urls')),
     path('contact/', include('apps.contact.urls')),
-    path('ferrovelho/', include('apps.ferrovelho.urls')),
+    # path('ferrovelho/', include('apps.ferrovelho.urls')),  # Located in root apps directory
     path('', include('core.app_urls')),
 ]
 
