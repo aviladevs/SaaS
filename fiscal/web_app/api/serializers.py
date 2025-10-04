@@ -3,6 +3,7 @@ Serializers para API REST Mobile
 """
 from rest_framework import serializers
 from core.models import NFe, NFeItem, CTe, ImportLog
+from core.webhooks import Webhook, WebhookLog
 
 
 class NFeItemSerializer(serializers.ModelSerializer):
@@ -99,3 +100,38 @@ class StatisticsSerializer(serializers.Serializer):
     top_produtos = serializers.ListField()
     top_rotas = serializers.ListField()
     vendas_por_mes = serializers.ListField()
+
+
+class WebhookSerializer(serializers.ModelSerializer):
+    """Serializer para webhooks"""
+    
+    eventos_list = serializers.ListField(source='get_eventos_list', read_only=True)
+    usuario_nome = serializers.CharField(source='usuario.username', read_only=True)
+    
+    class Meta:
+        model = Webhook
+        fields = [
+            'id', 'nome', 'url', 'eventos', 'eventos_list', 'ativo',
+            'secret_key', 'headers_customizados', 'timeout', 'retry_count',
+            'data_criacao', 'data_atualizacao', 'ultima_execucao',
+            'total_execucoes', 'total_erros', 'usuario_nome'
+        ]
+        read_only_fields = ['usuario_nome', 'data_criacao', 'data_atualizacao', 
+                           'ultima_execucao', 'total_execucoes', 'total_erros']
+        extra_kwargs = {
+            'secret_key': {'write_only': True}
+        }
+
+
+class WebhookLogSerializer(serializers.ModelSerializer):
+    """Serializer para logs de webhook"""
+    
+    webhook_nome = serializers.CharField(source='webhook.nome', read_only=True)
+    
+    class Meta:
+        model = WebhookLog
+        fields = [
+            'id', 'webhook_nome', 'evento', 'data_execucao',
+            'sucesso', 'status_code', 'payload', 'response', 'erro'
+        ]
+        read_only_fields = fields
