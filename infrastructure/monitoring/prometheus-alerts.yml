@@ -1,0 +1,247 @@
+# Prometheus Alert Rules for Ávila DevOps SaaS
+# High-load monitoring and alerting configuration
+
+groups:
+  - name: high_load_alerts
+    interval: 30s
+    rules:
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 1%)"
+          
+      # High response time alert
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 0.3
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High response time detected"
+          description: "p95 response time is {{ $value | humanizeDuration }} (threshold: 300ms)"
+          
+      # Request rate below target
+      - alert: LowRequestRate
+        expr: sum(rate(http_requests_total[1m])) < 1000
+        for: 10m
+        labels:
+          severity: info
+          team: platform
+        annotations:
+          summary: "Request rate below target"
+          description: "Current rate is {{ $value | humanize }} req/s (target: 1000 req/s)"
+          
+      # Database connection pool exhausted
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          (
+            sum(pgbouncer_pools_cl_active)
+            /
+            sum(pgbouncer_pools_cl_max)
+          ) > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          team: database
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "Connection pool usage is {{ $value | humanizePercentage }}"
+          
+      # Redis memory usage high
+      - alert: RedisMemoryHigh
+        expr: |
+          (
+            redis_memory_used_bytes
+            /
+            redis_memory_max_bytes
+          ) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: cache
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis memory usage is {{ $value | humanizePercentage }}"
+          
+      # Pod CPU throttling
+      - alert: PodCPUThrottling
+        expr: |
+          rate(container_cpu_cfs_throttled_seconds_total[5m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Pod experiencing CPU throttling"
+          description: "Pod {{ $labels.pod }} in {{ $labels.namespace }} is throttled"
+          
+      # Pod memory pressure
+      - alert: PodMemoryPressure
+        expr: |
+          (
+            container_memory_working_set_bytes
+            /
+            container_spec_memory_limit_bytes
+          ) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Pod under memory pressure"
+          description: "Pod {{ $labels.pod }} memory usage is {{ $value | humanizePercentage }}"
+          
+      # PostgreSQL replication lag
+      - alert: PostgresReplicationLag
+        expr: |
+          pg_replication_lag_seconds > 60
+        for: 5m
+        labels:
+          severity: warning
+          team: database
+        annotations:
+          summary: "PostgreSQL replication lag detected"
+          description: "Replication lag is {{ $value | humanizeDuration }}"
+          
+      # Nginx connection saturation
+      - alert: NginxConnectionSaturation
+        expr: |
+          (
+            nginx_connections_active
+            /
+            8192
+          ) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Nginx connection pool near saturation"
+          description: "Active connections: {{ $value | humanize }} (limit: 8192)"
+          
+      # HPA at max replicas
+      - alert: HPAMaxReplicasReached
+        expr: |
+          kube_horizontalpodautoscaler_status_current_replicas
+          >=
+          kube_horizontalpodautoscaler_spec_max_replicas
+        for: 10m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "HPA reached maximum replicas"
+          description: "HPA {{ $labels.horizontalpodautoscaler }} reached max replicas"
+          
+      # Disk space low
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/"}
+            /
+            node_filesystem_size_bytes{mountpoint="/"}
+          ) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          team: infrastructure
+        annotations:
+          summary: "Disk space critically low"
+          description: "Available disk space is {{ $value | humanizePercentage }}"
+
+  - name: application_performance
+    interval: 30s
+    rules:
+      # Request rate per service
+      - record: service:http_requests:rate5m
+        expr: sum(rate(http_requests_total[5m])) by (service)
+        
+      # Response time percentiles
+      - record: service:http_request_duration:p50
+        expr: |
+          histogram_quantile(0.50,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (service, le)
+          )
+          
+      - record: service:http_request_duration:p95
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (service, le)
+          )
+          
+      - record: service:http_request_duration:p99
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (service, le)
+          )
+          
+      # Error rate per service
+      - record: service:http_errors:rate5m
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+          
+      # Cache hit rate
+      - record: service:cache_hit_rate:rate5m
+        expr: |
+          sum(rate(cache_hits_total[5m])) by (service)
+          /
+          (
+            sum(rate(cache_hits_total[5m])) by (service)
+            +
+            sum(rate(cache_misses_total[5m])) by (service)
+          )
+
+  - name: database_performance
+    interval: 30s
+    rules:
+      # Active database connections
+      - record: postgres:connections:active
+        expr: sum(pg_stat_database_numbackends) by (instance)
+        
+      # Query duration
+      - record: postgres:query_duration:p95
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(pg_stat_statements_total_time_seconds_bucket[5m])) by (le)
+          )
+          
+      # Database size growth
+      - record: postgres:database_size:growth_rate
+        expr: rate(pg_database_size_bytes[1h])
+
+  - name: cache_performance
+    interval: 30s
+    rules:
+      # Redis hit rate
+      - record: redis:hit_rate:5m
+        expr: |
+          rate(redis_keyspace_hits_total[5m])
+          /
+          (
+            rate(redis_keyspace_hits_total[5m])
+            +
+            rate(redis_keyspace_misses_total[5m])
+          )
+          
+      # Redis operations per second
+      - record: redis:ops_per_sec
+        expr: sum(rate(redis_commands_total[1m])) by (instance)
+        
+      # Redis memory fragmentation
+      - record: redis:memory_fragmentation_ratio
+        expr: redis_memory_fragmentation_ratio
