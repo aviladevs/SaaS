@@ -1,0 +1,358 @@
+{
+  "dashboard": {
+    "title": "SLA Monitoring - Ávila DevOps SaaS",
+    "tags": ["saas", "sla", "compliance"],
+    "timezone": "browser",
+    "editable": true,
+    "graphTooltip": 1,
+    "time": {
+      "from": "now-30d",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Current Month SLA Status",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "avg_over_time(up[30d]) * 100",
+            "legendFormat": "Uptime %"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 3,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 99, "color": "yellow"},
+                {"value": 99.9, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "SLA Target: 99.9%",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "avg_over_time(up[30d]) * 100"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 99,
+            "max": 100,
+            "decimals": 3,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 99, "color": "red"},
+                {"value": 99.5, "color": "yellow"},
+                {"value": 99.9, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Error Budget Remaining",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "((1 - avg_over_time(up[30d])) / 0.001) * 100",
+            "legendFormat": "Budget Used"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 50, "color": "yellow"},
+                {"value": 80, "color": "orange"},
+                {"value": 100, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Allowed Downtime (Monthly)",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "(30 * 24 * 60 * 0.001)"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "m",
+            "mappings": [
+              {"type": "special", "options": {"match": "null", "result": {"text": "43.2 min"}}}
+            ]
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Service Uptime Trend (30 days)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "avg_over_time(up[24h]) * 100",
+            "legendFormat": "{{job}} - Daily Uptime"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Uptime %", "min": 99, "max": 100, "decimals": 2},
+          {"format": "short", "show": false}
+        ],
+        "lines": true,
+        "fill": 1,
+        "thresholds": [
+          {"value": 99.9, "colorMode": "custom", "op": "lt", "fill": true, "line": true, "fillColor": "rgba(255, 0, 0, 0.1)", "lineColor": "red"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Response Time SLA (< 300ms at P95)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "saas:http_request_duration:p95 * 1000",
+            "legendFormat": "{{service}} - P95"
+          }
+        ],
+        "yaxes": [
+          {"format": "ms", "label": "Response Time", "logBase": 1},
+          {"format": "short", "show": false}
+        ],
+        "lines": true,
+        "fill": 1,
+        "thresholds": [
+          {"value": 300, "colorMode": "custom", "op": "gt", "fill": true, "line": true, "fillColor": "rgba(255, 0, 0, 0.2)", "lineColor": "red"}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Error Rate SLA (< 0.1%)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "saas:http_error_rate:percentage",
+            "legendFormat": "{{service}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Error Rate", "logBase": 1, "max": 1},
+          {"format": "short", "show": false}
+        ],
+        "lines": true,
+        "fill": 1,
+        "thresholds": [
+          {"value": 0.1, "colorMode": "custom", "op": "gt", "fill": true, "line": true, "fillColor": "rgba(255, 0, 0, 0.2)", "lineColor": "red"}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "SLA Compliance Summary",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "avg_over_time(up[30d]) * 100",
+            "format": "table",
+            "instant": true,
+            "legendFormat": "Uptime"
+          },
+          {
+            "expr": "avg(saas:http_request_duration:p95) * 1000",
+            "format": "table",
+            "instant": true,
+            "legendFormat": "P95 Latency"
+          },
+          {
+            "expr": "avg(saas:http_error_rate:percentage)",
+            "format": "table",
+            "instant": true,
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "options": {
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Uptime"},
+              "properties": [
+                {"id": "unit", "value": "percent"},
+                {"id": "decimals", "value": 3},
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {"value": 0, "color": "red"},
+                      {"value": 99.5, "color": "yellow"},
+                      {"value": 99.9, "color": "green"}
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "P95 Latency"},
+              "properties": [
+                {"id": "unit", "value": "ms"},
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {"value": 0, "color": "green"},
+                      {"value": 300, "color": "yellow"},
+                      {"value": 1000, "color": "red"}
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Error Rate"},
+              "properties": [
+                {"id": "unit", "value": "percent"},
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {"value": 0, "color": "green"},
+                      {"value": 0.05, "color": "yellow"},
+                      {"value": 0.1, "color": "red"}
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Incidents This Month",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "count(ALERTS{alertstate=\"firing\", severity=\"critical\"})"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "yellow"},
+                {"value": 5, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Mean Time To Recovery (MTTR)",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 24},
+        "targets": [
+          {
+            "expr": "avg(ALERTS_FOR_STATE) / 60"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "m",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 15, "color": "yellow"},
+                {"value": 30, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Downtime Events (Last 30 Days)",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32},
+        "targets": [
+          {
+            "expr": "changes(up[30d]) > 0",
+            "format": "table"
+          }
+        ],
+        "options": {
+          "showHeader": true
+        }
+      }
+    ],
+    "refresh": "5m",
+    "schemaVersion": 27,
+    "version": 1
+  }
+}

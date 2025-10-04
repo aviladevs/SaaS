@@ -19,11 +19,18 @@ help:
 	@echo "  make deploy-staging - Deploy para homologação"
 	@echo "  make deploy-prod  - Deploy para produção"
 	@echo ""
+	@echo "📊 Monitoramento:"
+	@echo "  make monitor         - Inicia stack de monitoramento"
+	@echo "  make monitor-stop    - Para stack de monitoramento"
+	@echo "  make monitor-restart - Reinicia stack de monitoramento"
+	@echo "  make monitor-status  - Status dos serviços de monitoramento"
+	@echo "  make monitor-logs    - Visualiza logs do monitoramento"
+	@echo "  make monitor-health  - Health check do monitoramento"
+	@echo ""
 	@echo "🔧 Manutenção:"
 	@echo "  make clean        - Limpa arquivos temporários"
 	@echo "  make backup       - Cria backup completo"
 	@echo "  make restore      - Restaura backup"
-	@echo "  make monitor      - Inicia monitoramento"
 	@echo "  make logs         - Visualiza logs"
 	@echo ""
 	@echo "👥 Tenants:"
@@ -117,12 +124,33 @@ restore:
 
 # Inicia monitoramento
 monitor:
-	@echo "📊 Iniciando monitoramento..."
-	@docker-compose -f docker-compose.monitoring.yml up -d
-	@echo "✅ Monitoramento iniciado!"
-	@echo "📈 Grafana: http://localhost:3001"
-	@echo "🔍 Kibana: http://localhost:5601"
-	@echo "📋 Prometheus: http://localhost:9090"
+	@echo "📊 Iniciando stack de monitoramento..."
+	@bash monitoring/start-monitoring.sh
+
+# Para monitoramento
+monitor-stop:
+	@echo "⏹️  Parando stack de monitoramento..."
+	@docker-compose -f docker-compose.monitoring.yml down
+	@echo "✅ Monitoramento parado!"
+
+# Reinicia monitoramento
+monitor-restart:
+	@echo "🔄 Reiniciando stack de monitoramento..."
+	@docker-compose -f docker-compose.monitoring.yml restart
+	@echo "✅ Monitoramento reiniciado!"
+
+# Status do monitoramento
+monitor-status:
+	@echo "📊 Status do monitoramento:"
+	@docker-compose -f docker-compose.monitoring.yml ps
+
+# Logs do monitoramento
+monitor-logs:
+	@docker-compose -f docker-compose.monitoring.yml logs -f
+
+# Health check do monitoramento
+monitor-health:
+	@bash monitoring/start-monitoring.sh health
 
 # Visualiza logs
 logs:
