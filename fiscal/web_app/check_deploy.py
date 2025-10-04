@@ -1,6 +1,15 @@
 """
 Script de verificação pré-deploy
 Verifica se tudo está pronto para deploy no GCP
+
+Uso:
+    python check_deploy.py              # Modo interativo (espera ENTER no final)
+    python check_deploy.py --no-prompt  # Modo não-interativo (para CI/automação)
+
+Códigos de saída:
+    0 - Tudo pronto para deploy
+    1 - Quase pronto (com avisos)
+    2 - Não está pronto (com erros)
 """
 
 import os
@@ -20,7 +29,7 @@ def check_gcloud():
     print_header("VERIFICANDO GOOGLE CLOUD SDK")
     try:
         result = subprocess.run(['gcloud', '--version'], 
-                              capture_output=True, text=True, timeout=5)
+                              capture_output=True, text=True, timeout=2)
         if result.returncode == 0:
             print("✅ Google Cloud SDK instalado")
             print(result.stdout.split('\n')[0])
@@ -32,6 +41,10 @@ def check_gcloud():
         print("❌ Google Cloud SDK NÃO instalado")
         print("\n💡 Instale em: https://cloud.google.com/sdk/docs/install")
         return False
+    except subprocess.TimeoutExpired:
+        print("⚠️  Google Cloud SDK não responde (timeout)")
+        print("\n💡 Verifique se o gcloud está instalado corretamente")
+        return False
     except Exception as e:
         print(f"❌ Erro ao verificar gcloud: {e}")
         return False
@@ -42,7 +55,7 @@ def check_authenticated():
     print_header("VERIFICANDO AUTENTICAÇÃO")
     try:
         result = subprocess.run(['gcloud', 'auth', 'list'], 
-                              capture_output=True, text=True, timeout=10)
+                              capture_output=True, text=True, timeout=5)
         if result.returncode == 0 and 'ACTIVE' in result.stdout:
             print("✅ Autenticado no Google Cloud")
             return True
@@ -50,6 +63,14 @@ def check_authenticated():
             print("❌ NÃO autenticado")
             print("\n💡 Execute: gcloud auth login")
             return False
+    except subprocess.TimeoutExpired:
+        print("⚠️  Comando de autenticação não responde (timeout)")
+        print("\n💡 Execute: gcloud auth login")
+        return False
+    except FileNotFoundError:
+        print("⚠️  Google Cloud SDK não encontrado")
+        print("\n💡 Instale o gcloud primeiro")
+        return False
     except Exception as e:
         print(f"❌ Erro ao verificar autenticação: {e}")
         return False
@@ -60,8 +81,8 @@ def check_project():
     print_header("VERIFICANDO PROJETO")
     try:
         result = subprocess.run(['gcloud', 'config', 'get-value', 'project'], 
-                              capture_output=True, text=True, timeout=10)
-        if result.returncode == 0 and result.stdout.strip():
+                              capture_output=True, text=True, timeout=5)
+        if result.returncode == 0 and result.stdout.strip() and result.stdout.strip() != '(unset)':
             project = result.stdout.strip()
             print(f"✅ Projeto configurado: {project}")
             return True
@@ -71,6 +92,13 @@ def check_project():
             print("   gcloud projects list")
             print("   gcloud config set project SEU_PROJECT_ID")
             return False
+    except subprocess.TimeoutExpired:
+        print("⚠️  Comando não responde (timeout)")
+        print("\n💡 Verifique a instalação do gcloud")
+        return False
+    except FileNotFoundError:
+        print("⚠️  Google Cloud SDK não encontrado")
+        return False
     except Exception as e:
         print(f"❌ Erro ao verificar projeto: {e}")
         return False
@@ -119,7 +147,7 @@ def check_app_engine():
     print_header("VERIFICANDO APP ENGINE")
     try:
         result = subprocess.run(['gcloud', 'app', 'describe'], 
-                              capture_output=True, text=True, timeout=10)
+                              capture_output=True, text=True, timeout=5)
         if result.returncode == 0:
             print("✅ App Engine já configurado")
             return True
@@ -128,6 +156,13 @@ def check_app_engine():
             print("\n💡 Execute (APENAS UMA VEZ):")
             print("   gcloud app create --region=southamerica-east1")
             return False
+    except subprocess.TimeoutExpired:
+        print("⚠️  Comando não responde (timeout)")
+        print("\n💡 Verifique a instalação do gcloud")
+        return False
+    except FileNotFoundError:
+        print("⚠️  Google Cloud SDK não encontrado")
+        return False
     except Exception as e:
         print(f"❌ Erro ao verificar App Engine: {e}")
         return False
@@ -176,17 +211,25 @@ def main():
     if passed == total:
         print("\n🎉 TUDO PRONTO PARA DEPLOY!")
         show_deploy_command()
+        return 0  # Success
     elif passed >= total - 1:
         print("\n⚠️  QUASE PRONTO! Corrija os avisos acima.")
         show_deploy_command()
+        return 1  # Warning
     else:
         print("\n❌ AINDA NÃO ESTÁ PRONTO")
         print("\nCorrija os erros acima antes de fazer deploy.")
         print("\n📚 Consulte: DEPLOY_RAPIDO.md ou DEPLOY.md")
+        return 2  # Error
     
     print("\n" + "="*60 + "\n")
 
 
 if __name__ == '__main__':
-    main()
-    input("Pressione ENTER para sair...")
+    exit_code = main()
+    # Only wait for input if not running non-interactively
+    # Check if running in CI or with --no-prompt flag
+    if '--no-prompt' not in sys.argv and sys.stdin.isatty():
+        input("Pressione ENTER para sair...")
+    sys.exit(exit_code if exit_code is not None else 0)
+
