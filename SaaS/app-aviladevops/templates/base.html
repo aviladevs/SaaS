@@ -1,176 +1,33 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block description %}Ávila DevOps - Transformando ideias em soluções tecnológicas excepcionais{% endblock %}">
-    <meta name="keywords" content="DevOps, desenvolvimento web, tecnologia, transformação digital, Ávila DevOps">
+    <meta name="description" content="{% block meta_description %}Ávila DevOps - Plataforma SaaS completa para gestão empresarial{% endblock %}">
+    <meta name="keywords" content="DevOps, SaaS, gestão empresarial, clínica, fiscal, sistema">
     <meta name="author" content="Ávila DevOps">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://aviladevops.com.br/">
-    <meta property="og:title" content="{% block title %}Ávila DevOps{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}{% block description %}Ávila DevOps - Transformando ideias em soluções tecnológicas excepcionais{% endblock %}{% endblock %}">
-    <meta property="og:image" content="https://aviladevops.com.br/static/images/og-image.jpg">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://aviladevops.com.br/">
-    <meta property="twitter:title" content="{% block twitter_title %}{% block title %}Ávila DevOps{% endblock %}{% endblock %}">
-    <meta property="twitter:description" content="{% block twitter_description %}{% block description %}Ávila DevOps - Transformando ideias em soluções tecnológicas excepcionais{% endblock %}{% endblock %}">
-    <meta property="twitter:image" content="https://aviladevops.com.br/static/images/og-image.jpg">
-
-    <title>{% block title %}Ávila DevOps{% endblock %}</title>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- AOS Animation -->
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-
-    <!-- Custom CSS -->
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-    {% block extra_head %}{% endblock %}
-</head>
-<body>
-    <!-- Preloader -->
-    <div id="preloader">
-        <div class="preloader-content">
-            <div class="logo-preloader">
-                <i class="fas fa-code"></i>
-            </div>
-            <div class="loading-text">Carregando...</div>
-        </div>
-    </div>
-
-    <!-- Navbar -->
-    <nav class="navbar" id="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="/">
-                    <i class="fas fa-code"></i>
-                    <span>Ávila DevOps</span>
-                </a>
-            </div>
-
-            <div class="nav-menu" id="nav-menu">
-                <a href="/" class="nav-link">Início</a>
-                <a href="/api/health/" class="nav-link">API</a>
-                <a href="/admin/" class="nav-link">Admin</a>
-            </div>
-
-            <div class="nav-actions">
-                <a href="#contact" class="btn btn-primary">Fale Conosco</a>
-                <button class="nav-toggle" id="nav-toggle">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main>
-        {% block content %}
-        <div class="hero-section">
-            <div class="container">
-                <h1>Bem-vindo ao SaaS Ávila DevOps</h1>
-                <p>Sistema em funcionamento com sucesso!</p>
-            </div>
-        </div>
-        {% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <div class="footer-logo">
-                        <i class="fas fa-code"></i>
-                        <p>Transformando ideias em soluções tecnológicas excepcionais desde 2014.</p>
-                    </div>
-                    <div class="footer-social">
-                        <a href="https://linkedin.com/company/avila-devops" target="_blank"><i class="fab fa-linkedin"></i></a>
-                        <a href="https://github.com/avila-devops" target="_blank"><i class="fab fa-github"></i></a>
-                        <a href="https://instagram.com/avila.devops" target="_blank"><i class="fab fa-instagram"></i></a>
-                        <a href="https://youtube.com/@aviladevops" target="_blank"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Serviços</h4>
-                    <ul>
-                        <li><a href="#">Desenvolvimento Web</a></li>
-                        <li><a href="#">DevOps & Cloud</a></li>
-                        <li><a href="#">Consultoria em TI</a></li>
-                        <li><a href="#">Aplicativos Mobile</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Empresa</h4>
-                    <ul>
-                        <li><a href="#">Sobre Nós</a></li>
-                        <li><a href="#">Portfólio</a></li>
-                        <li><a href="#">Carreiras</a></li>
-                        <li><a href="#">Blog</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Contato</h4>
-                    <div class="contact-info">
-                        <p><i class="fas fa-envelope"></i> dev@aviladevops.com.br</p>
-                        <p><i class="fab fa-whatsapp"></i> +55 17 99781-1471</p>
-                        <p><i class="fas fa-map-marker-alt"></i> São José do Rio Preto, SP</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <div class="footer-bottom-content">
-                    <p>&copy; 2024 Ávila DevOps. Todos os direitos reservados.</p>
-                    <div class="footer-links">
-                        <a href="#">Política de Privacidade</a>
-                        <a href="#">Termos de Uso</a>
-                        <a href="#">Cookies</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts -->
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    {% block extra_scripts %}{% endblock %}
-
+    
+    <title>{% block title %}Ávila DevOps SaaS{% endblock %}</title>
+    
+    <!-- CSS Básico -->
     <style>
-        .hero-section {
-            padding: 100px 0;
-            text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding-top: 80px;
         }
         .navbar {
-            background: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: fixed;
             top: 0;
             width: 100%;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             z-index: 1000;
+            padding: 1rem 0;
         }
         .nav-container {
             max-width: 1200px;
@@ -178,147 +35,182 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
+            padding: 0 2rem;
         }
-        .nav-logo a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: #333;
+        .logo {
+            font-size: 1.5rem;
             font-weight: bold;
+            color: #007bff;
         }
-        .nav-menu {
+        .nav-links {
             display: flex;
             gap: 2rem;
+            list-style: none;
         }
-        .nav-link {
+        .nav-links a {
             text-decoration: none;
             color: #333;
             transition: color 0.3s;
         }
-        .nav-link:hover {
-            color: #667eea;
+        .nav-links a:hover {
+            color: #007bff;
         }
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        .btn-primary {
-            background: #667eea;
+        .hero {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
             color: white;
+            padding: 100px 0;
+            text-align: center;
         }
-        .btn-primary:hover {
-            background: #5a6fd8;
-        }
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: none;
-            flex-direction: column;
-            gap: 3px;
-        }
-        .nav-toggle span {
-            width: 25px;
-            height: 3px;
-            background: #333;
-            transition: all 0.3s;
-        }
-        .footer {
-            background: #333;
-            color: white;
-            padding: 3rem 0 1rem;
-        }
-        .footer-container {
+        .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
         }
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .hero p {
+            font-size: 1.2rem;
             margin-bottom: 2rem;
         }
-        .footer-section h4 {
-            margin-bottom: 1rem;
-            color: #667eea;
-        }
-        .footer-section ul {
-            list-style: none;
-            padding: 0;
-        }
-        .footer-section ul li {
-            margin-bottom: 0.5rem;
-        }
-        .footer-section a {
-            color: #ccc;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        .footer-section a:hover {
-            color: #667eea;
-        }
-        .footer-social {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        .footer-social a {
-            width: 40px;
-            height: 40px;
-            background: #667eea;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: #28a745;
             color: white;
+            text-decoration: none;
+            border-radius: 5px;
             transition: all 0.3s;
         }
-        .footer-social a:hover {
-            background: #5a6fd8;
+        .btn:hover {
+            background: #218838;
             transform: translateY(-2px);
         }
-        .footer-bottom {
-            border-top: 1px solid #555;
-            padding-top: 1rem;
+        .services {
+            padding: 80px 0;
+            background: white;
+        }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        .service-card {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .service-icon {
+            font-size: 3rem;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            padding: 2rem 0;
             text-align: center;
         }
-        .footer-bottom-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .footer-links {
-            display: flex;
-            gap: 1rem;
-        }
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            padding-top: 80px;
-        }
-        main {
-            min-height: calc(100vh - 200px);
+        .status {
+            background: #e8f5e8;
+            border: 1px solid #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 2rem 0;
         }
         @media (max-width: 768px) {
-            .nav-menu {
-                display: none;
-            }
-            .nav-toggle {
-                display: flex;
-            }
-            .footer-bottom-content {
-                flex-direction: column;
-                text-align: center;
-            }
+            .hero h1 { font-size: 2rem; }
+            .nav-links { display: none; }
+            .services-grid { grid-template-columns: 1fr; }
         }
     </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🚀 Ávila DevOps</div>
+            <ul class="nav-links">
+                <li><a href="/">Início</a></li>
+                <li><a href="/api/health/">API Status</a></li>
+                <li><a href="/admin/">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}
+        <section class="hero">
+            <div class="container">
+                <h1>Plataforma SaaS Ávila DevOps</h1>
+                <p>Sistema multi-tenant para gestão completa de seus negócios</p>
+                <div class="status">
+                    ✅ Sistema funcionando normalmente - Versão {{ version|default:"v5" }}
+                </div>
+                <a href="#services" class="btn">Explorar Serviços</a>
+            </div>
+        </section>
+
+        <section id="services" class="services">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: 1rem;">Nossos Serviços</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 3rem;">
+                    Cada serviço é independente e otimizado para suas necessidades específicas
+                </p>
+                
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon">🏥</div>
+                        <h3>Gestão de Clínica</h3>
+                        <p>Sistema completo para gestão de clínicas e consultórios médicos</p>
+                        <a href="https://clinica.aviladevops.com.br" class="btn" style="margin-top: 1rem;">Acessar</a>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-icon">📊</div>
+                        <h3>Sistema Fiscal</h3>
+                        <p>Gestão fiscal completa com emissão de notas e relatórios</p>
+                        <a href="https://fiscal.aviladevops.com.br" class="btn" style="margin-top: 1rem;">Acessar</a>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-icon">⚙️</div>
+                        <h3>Sistema de Gestão</h3>
+                        <p>ERP completo para gestão empresarial e reciclagem</p>
+                        <a href="https://sistema.aviladevops.com.br" class="btn" style="margin-top: 1rem;">Acessar</a>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-icon">🏠</div>
+                        <h3>Landing Page</h3>
+                        <p>Página institucional e portal de entrada</p>
+                        <a href="https://aviladevops.com.br" class="btn" style="margin-top: 1rem;">Acessar</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Ávila DevOps. Todos os direitos reservados.</p>
+            <p>Plataforma SaaS multi-tenant em produção</p>
+        </div>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
