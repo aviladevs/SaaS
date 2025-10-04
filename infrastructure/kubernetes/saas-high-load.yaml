@@ -1,0 +1,1202 @@
+# Ávila DevOps SaaS - High-Load Kubernetes Configuration
+# Optimized for 1000+ concurrent requests per second
+# Target: Support 1000-1500 req/s with <300ms response time and <1% error rate
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aviladevops-saas
+  labels:
+    name: aviladevops-saas
+    environment: production
+
+---
+# ConfigMap for application configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: saas-config
+  namespace: aviladevops-saas
+data:
+  ENVIRONMENT: "production"
+  DEBUG: "False"
+  DATABASE_ENGINE: "django.db.backends.postgresql"
+  REDIS_URL: "redis://redis-cluster:6379/0"
+  CACHE_BACKEND: "django_redis.cache.RedisCache"
+  CELERY_BROKER_URL: "redis://redis-cluster:6379/1"
+
+---
+# Secrets for sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: saas-secrets
+  namespace: aviladevops-saas
+type: Opaque
+data:
+  SECRET_KEY: <base64-encoded-secret-key>
+  DATABASE_URL: <base64-encoded-db-url>
+  REDIS_PASSWORD: <base64-encoded-redis-password>
+
+---
+# PostgreSQL Master-Slave Configuration
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-master
+  namespace: aviladevops-saas
+  labels:
+    app: postgres
+    role: master
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    app: postgres
+    role: master
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-master
+  namespace: aviladevops-saas
+spec:
+  serviceName: postgres-master
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+      role: master
+  template:
+    metadata:
+      labels:
+        app: postgres
+        role: master
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "aviladevops_saas"
+        - name: POSTGRES_USER
+          value: "saas_user"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: saas-secrets
+              key: DATABASE_URL
+        - name: POSTGRES_MAX_CONNECTIONS
+          value: "500"
+        - name: POSTGRES_SHARED_BUFFERS
+          value: "256MB"
+        - name: POSTGRES_EFFECTIVE_CACHE_SIZE
+          value: "1GB"
+        - name: POSTGRES_WORK_MEM
+          value: "16MB"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "1000m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 100Gi
+
+---
+# PostgreSQL Read Replicas
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-replica
+  namespace: aviladevops-saas
+  labels:
+    app: postgres
+    role: replica
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    app: postgres
+    role: replica
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-replica
+  namespace: aviladevops-saas
+spec:
+  serviceName: postgres-replica
+  replicas: 2
+  selector:
+    matchLabels:
+      app: postgres
+      role: replica
+  template:
+    metadata:
+      labels:
+        app: postgres
+        role: replica
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "aviladevops_saas"
+        - name: POSTGRES_USER
+          value: "saas_user"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: saas-secrets
+              key: DATABASE_URL
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 50Gi
+
+---
+# PgBouncer for connection pooling
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgbouncer-config
+  namespace: aviladevops-saas
+data:
+  pgbouncer.ini: |
+    [databases]
+    aviladevops_saas = host=postgres-master port=5432 dbname=aviladevops_saas
+    
+    [pgbouncer]
+    listen_addr = 0.0.0.0
+    listen_port = 5432
+    auth_type = md5
+    auth_file = /etc/pgbouncer/userlist.txt
+    pool_mode = transaction
+    max_client_conn = 10000
+    default_pool_size = 100
+    reserve_pool_size = 25
+    reserve_pool_timeout = 5
+    max_db_connections = 100
+    server_lifetime = 3600
+    server_idle_timeout = 600
+    server_connect_timeout = 15
+    query_timeout = 30
+    query_wait_timeout = 120
+    client_idle_timeout = 900
+    idle_transaction_timeout = 60
+    log_connections = 0
+    log_disconnections = 0
+    log_pooler_errors = 1
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgbouncer
+  namespace: aviladevops-saas
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pgbouncer
+  template:
+    metadata:
+      labels:
+        app: pgbouncer
+    spec:
+      containers:
+      - name: pgbouncer
+        image: pgbouncer/pgbouncer:latest
+        ports:
+        - containerPort: 5432
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        volumeMounts:
+        - name: pgbouncer-config
+          mountPath: /etc/pgbouncer
+      volumes:
+      - name: pgbouncer-config
+        configMap:
+          name: pgbouncer-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgbouncer
+  namespace: aviladevops-saas
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    app: pgbouncer
+  type: ClusterIP
+
+---
+# Redis Cluster Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: aviladevops-saas
+data:
+  redis.conf: |
+    cluster-enabled yes
+    cluster-config-file nodes.conf
+    cluster-node-timeout 5000
+    appendonly yes
+    maxmemory 2gb
+    maxmemory-policy allkeys-lru
+    save ""
+    tcp-backlog 511
+    timeout 0
+    tcp-keepalive 300
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-cluster
+  namespace: aviladevops-saas
+spec:
+  serviceName: redis-cluster
+  replicas: 6
+  selector:
+    matchLabels:
+      app: redis-cluster
+  template:
+    metadata:
+      labels:
+        app: redis-cluster
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+          name: client
+        - containerPort: 16379
+          name: gossip
+        command:
+        - redis-server
+        - /conf/redis.conf
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: conf
+          mountPath: /conf
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: conf
+        configMap:
+          name: redis-config
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster
+  namespace: aviladevops-saas
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+    name: client
+  - port: 16379
+    targetPort: 16379
+    name: gossip
+  selector:
+    app: redis-cluster
+  clusterIP: None
+
+---
+# Landing Page Deployment with high availability
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: landing-page
+  namespace: aviladevops-saas
+  labels:
+    app: landing-page
+    tier: frontend
+spec:
+  replicas: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 2
+      maxSurge: 3
+  selector:
+    matchLabels:
+      app: landing-page
+  template:
+    metadata:
+      labels:
+        app: landing-page
+        tier: frontend
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - landing-page
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: landing-page
+        image: gcr.io/aviladevops/landing-page:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: saas-config
+        - secretRef:
+            name: saas-secrets
+        env:
+        - name: GUNICORN_WORKERS
+          value: "4"
+        - name: GUNICORN_THREADS
+          value: "2"
+        - name: GUNICORN_TIMEOUT
+          value: "30"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: landing-page
+  namespace: aviladevops-saas
+spec:
+  selector:
+    app: landing-page
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP
+
+---
+# HorizontalPodAutoscaler for Landing Page
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: landing-page-hpa
+  namespace: aviladevops-saas
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: landing-page
+  minReplicas: 10
+  maxReplicas: 50
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+      - type: Pods
+        value: 5
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+      selectPolicy: Min
+
+---
+# Recycling System Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recycling-system
+  namespace: aviladevops-saas
+  labels:
+    app: recycling-system
+    tier: backend
+spec:
+  replicas: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 2
+      maxSurge: 3
+  selector:
+    matchLabels:
+      app: recycling-system
+  template:
+    metadata:
+      labels:
+        app: recycling-system
+        tier: backend
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - recycling-system
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: recycling-system
+        image: gcr.io/aviladevops/recycling-system:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: saas-config
+        - secretRef:
+            name: saas-secrets
+        env:
+        - name: GUNICORN_WORKERS
+          value: "4"
+        - name: GUNICORN_THREADS
+          value: "2"
+        resources:
+          requests:
+            memory: "768Mi"
+            cpu: "750m"
+          limits:
+            memory: "1.5Gi"
+            cpu: "1500m"
+        livenessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recycling-system
+  namespace: aviladevops-saas
+spec:
+  selector:
+    app: recycling-system
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: recycling-system-hpa
+  namespace: aviladevops-saas
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: recycling-system
+  minReplicas: 10
+  maxReplicas: 50
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Fiscal System Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fiscal-system
+  namespace: aviladevops-saas
+  labels:
+    app: fiscal-system
+    tier: backend
+spec:
+  replicas: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 2
+      maxSurge: 3
+  selector:
+    matchLabels:
+      app: fiscal-system
+  template:
+    metadata:
+      labels:
+        app: fiscal-system
+        tier: backend
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - fiscal-system
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: fiscal-system
+        image: gcr.io/aviladevops/fiscal-system:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: saas-config
+        - secretRef:
+            name: saas-secrets
+        env:
+        - name: GUNICORN_WORKERS
+          value: "4"
+        - name: GUNICORN_THREADS
+          value: "2"
+        resources:
+          requests:
+            memory: "768Mi"
+            cpu: "750m"
+          limits:
+            memory: "1.5Gi"
+            cpu: "1500m"
+        livenessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fiscal-system
+  namespace: aviladevops-saas
+spec:
+  selector:
+    app: fiscal-system
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: fiscal-system-hpa
+  namespace: aviladevops-saas
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: fiscal-system
+  minReplicas: 10
+  maxReplicas: 50
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Clinica System Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clinica-system
+  namespace: aviladevops-saas
+  labels:
+    app: clinica-system
+    tier: frontend
+spec:
+  replicas: 8
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 2
+      maxSurge: 3
+  selector:
+    matchLabels:
+      app: clinica-system
+  template:
+    metadata:
+      labels:
+        app: clinica-system
+        tier: frontend
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - clinica-system
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: clinica-system
+        image: gcr.io/aviladevops/clinica-system:latest
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: saas-config
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health/
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clinica-system
+  namespace: aviladevops-saas
+spec:
+  selector:
+    app: clinica-system
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: ClusterIP
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: clinica-system-hpa
+  namespace: aviladevops-saas
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: clinica-system
+  minReplicas: 8
+  maxReplicas: 40
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Admin/Main App Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-app
+  namespace: aviladevops-saas
+  labels:
+    app: main-app
+    tier: backend
+spec:
+  replicas: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 2
+      maxSurge: 3
+  selector:
+    matchLabels:
+      app: main-app
+  template:
+    metadata:
+      labels:
+        app: main-app
+        tier: backend
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - main-app
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: main-app
+        image: gcr.io/aviladevops/main-app:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: saas-config
+        - secretRef:
+            name: saas-secrets
+        env:
+        - name: GUNICORN_WORKERS
+          value: "4"
+        - name: GUNICORN_THREADS
+          value: "2"
+        resources:
+          requests:
+            memory: "768Mi"
+            cpu: "750m"
+          limits:
+            memory: "1.5Gi"
+            cpu: "1500m"
+        livenessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-app
+  namespace: aviladevops-saas
+spec:
+  selector:
+    app: main-app
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: main-app-hpa
+  namespace: aviladevops-saas
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: main-app
+  minReplicas: 10
+  maxReplicas: 50
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# Prometheus for monitoring
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: aviladevops-saas
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    
+    scrape_configs:
+    - job_name: 'kubernetes-pods'
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+    
+    - job_name: 'postgres'
+      static_configs:
+      - targets: ['postgres-master:9187', 'postgres-replica:9187']
+    
+    - job_name: 'redis'
+      static_configs:
+      - targets: ['redis-cluster:9121']
+    
+    - job_name: 'nginx'
+      static_configs:
+      - targets: ['nginx:9113']
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: aviladevops-saas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        ports:
+        - containerPort: 9090
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/prometheus
+        - name: data
+          mountPath: /prometheus
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus-config
+      - name: data
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: aviladevops-saas
+spec:
+  selector:
+    app: prometheus
+  ports:
+  - port: 9090
+    targetPort: 9090
+  type: ClusterIP
+
+---
+# Grafana for dashboards
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: aviladevops-saas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: saas-secrets
+              key: SECRET_KEY
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/grafana
+      volumes:
+      - name: data
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: aviladevops-saas
+spec:
+  selector:
+    app: grafana
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: LoadBalancer
+
+---
+# PodDisruptionBudget for high availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: landing-page-pdb
+  namespace: aviladevops-saas
+spec:
+  minAvailable: 5
+  selector:
+    matchLabels:
+      app: landing-page
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: recycling-system-pdb
+  namespace: aviladevops-saas
+spec:
+  minAvailable: 5
+  selector:
+    matchLabels:
+      app: recycling-system
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fiscal-system-pdb
+  namespace: aviladevops-saas
+spec:
+  minAvailable: 5
+  selector:
+    matchLabels:
+      app: fiscal-system
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: main-app-pdb
+  namespace: aviladevops-saas
+spec:
+  minAvailable: 5
+  selector:
+    matchLabels:
+      app: main-app
+
+---
+# NetworkPolicy for security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: saas-network-policy
+  namespace: aviladevops-saas
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8000
+    - protocol: TCP
+      port: 3000
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis-cluster
+    ports:
+    - protocol: TCP
+      port: 6379
+  - ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
