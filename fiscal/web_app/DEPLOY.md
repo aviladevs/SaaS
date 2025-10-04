@@ -4,6 +4,31 @@ Guia completo para deploy do XML Manager no GCP.
 
 ---
 
+## 🔍 VERIFICAR SE ESTÁ PRONTO
+
+Antes de iniciar o deploy, verifique se tudo está configurado:
+
+```powershell
+# Resposta rápida sim/não
+python verificar_deploy.py
+
+# Verificação detalhada
+python check_deploy.py
+
+# Para CI/automação (não-interativo)
+python check_deploy.py --no-prompt
+```
+
+O script verifica:
+- ✅ Google Cloud SDK instalado
+- ✅ Autenticação ativa
+- ✅ Projeto GCP configurado
+- ✅ Arquivos necessários presentes
+- ✅ Arquivos estáticos coletados
+- ✅ App Engine criado
+
+---
+
 ## 📋 PRÉ-REQUISITOS
 
 ### 1. Google Cloud SDK Instalado

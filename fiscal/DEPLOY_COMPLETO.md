@@ -48,7 +48,8 @@ Você tem **3 opções** de deploy:
 cd "d:\Dev Driver\XML_Organizado\web_app"
 
 # 2. Verificar se está tudo pronto
-python check_deploy.py
+python verificar_deploy.py
+# Ou para verificação detalhada: python check_deploy.py
 
 # 3. Login (abre navegador)
 gcloud auth login

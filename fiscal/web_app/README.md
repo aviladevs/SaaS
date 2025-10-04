@@ -28,6 +28,34 @@ Sistema completo de gestão de XMLs fiscais (NFe e CTe) com interface responsiva
 
 ## 🚀 Instalação Rápida
 
+### 0. Verificar Pré-requisitos para Deploy
+
+Antes de fazer deploy no Google Cloud, verifique se tudo está pronto:
+
+```bash
+# Resposta rápida sim/não
+python verificar_deploy.py
+
+# Verificação detalhada
+python check_deploy.py
+
+# Para CI/automação (não-interativo)
+python check_deploy.py --no-prompt
+```
+
+O script verifica:
+- ✅ Google Cloud SDK instalado
+- ✅ Autenticação ativa  
+- ✅ Projeto GCP configurado
+- ✅ Arquivos necessários presentes
+- ✅ Arquivos estáticos coletados
+- ✅ App Engine criado
+
+**📚 Documentação de Deploy:**
+- `DEPLOY_RAPIDO.md` - Deploy rápido em 3 comandos
+- `DEPLOY_COMPLETO.md` - Guia completo passo a passo
+- `DEPLOY.md` - Configurações avançadas
+
 ### 1. Instalar Dependências
 
 ```bash
