@@ -67,7 +67,7 @@ jobs:
 
     - name: Set up Node.js
       if: matrix.service.framework == 'nextjs'
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: '18'
         cache: 'npm'
@@ -160,7 +160,7 @@ jobs:
 
     - name: Set up Node.js
       if: matrix.service.type == 'nextjs'
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: '18'
         cache: 'npm'
