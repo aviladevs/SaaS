@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'apps.blog',
     'apps.contact',
     'apps.api',
+    'apps.ferrovelho',
 ]
 
 MIDDLEWARE = [
@@ -233,7 +234,7 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Logging configuration
+# Logging configuration (simplified for compatibility)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -248,12 +249,6 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
-            'formatter': 'verbose',
-        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
@@ -262,19 +257,9 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'apps': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
     },
 }
-
-# Create logs directory if it doesn't exist
-if not DEBUG:
-    import os
-    os.makedirs(BASE_DIR / 'logs', exist_ok=True)

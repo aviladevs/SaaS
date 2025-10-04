@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-tachometer-alt"></i> Dashboard Administrativo
+        </h1>
+        <p class="lead">Controle completo da plataforma Ávila DevOps SaaS</p>
+    </div>
+</div>
+
+<!-- Cards de Status dos Serviços -->
+<div class="row mb-4">
+    {% for service_id, service_info in services.items() %}
+    <div class="col-md-4 mb-3">
+        <div class="card card-hover">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">{{ service_info.name }}</h5>
+                        <p class="card-text">
+                            <small class="text-muted">{{ service_info.url }}</small>
+                        </p>
+                    </div>
+                    <div>
+                        <span class="badge bg-success">
+                            <i class="fas fa-check-circle"></i> Online
+                        </span>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{{ service_info.url }}" class="btn btn-primary btn-sm" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> Acessar
+                    </a>
+                    <a href="/deploy?service={{ service_id }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-rocket"></i> Deploy
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Cards de Ações Rápidas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card card-hover text-center">
+            <div class="card-body">
+                <i class="fas fa-rocket fa-2x text-primary mb-3"></i>
+                <h5 class="card-title">Deploy</h5>
+                <p class="card-text">Fazer deploy de serviços</p>
+                <a href="/deploy" class="btn btn-primary">Acessar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-hover text-center">
+            <div class="card-body">
+                <i class="fas fa-users fa-2x text-success mb-3"></i>
+                <h5 class="card-title">Tenants</h5>
+                <p class="card-text">Gerenciar clientes</p>
+                <a href="/tenants" class="btn btn-success">Acessar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-hover text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-info mb-3"></i>
+                <h5 class="card-title">Monitoramento</h5>
+                <p class="card-text">Ver métricas e logs</p>
+                <a href="/monitoring" class="btn btn-info">Acessar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-hover text-center">
+            <div class="card-body">
+                <i class="fas fa-database fa-2x text-warning mb-3"></i>
+                <h5 class="card-title">Backup</h5>
+                <p class="card-text">Gerenciar backups</p>
+                <a href="/backup" class="btn btn-warning">Acessar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informações do Sistema -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-server"></i> Status do Sistema</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>Serviços Ativos:</strong></td>
+                        <td><span class="badge bg-success">5/5</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Uptime:</strong></td>
+                        <td>99.9%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Último Deploy:</strong></td>
+                        <td>{{ "2024-01-15 10:30:00" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Clientes Ativos:</strong></td>
+                        <td>47</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bell"></i> Notificações Recentes</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>Deploy do Sistema Fiscal concluído com sucesso</small>
+                        <small class="ms-auto text-muted">2 min atrás</small>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-user-plus text-primary me-2"></i>
+                        <small>Novo tenant "Empresa ABC" criado</small>
+                        <small class="ms-auto text-muted">15 min atrás</small>
+                    </div>
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        <small>Uso de CPU acima de 80% no serviço principal</small>
+                        <small class="ms-auto text-muted">1h atrás</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Links Rápidos -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-link"></i> Links Rápidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a href="https://console.cloud.google.com/" class="btn btn-outline-primary w-100 mb-2" target="_blank">
+                            <i class="fab fa-google"></i> Google Cloud Console
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="https://github.com/avila-devops/saas" class="btn btn-outline-dark w-100 mb-2" target="_blank">
+                            <i class="fab fa-github"></i> Repositório GitHub
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="https://grafana.aviladevops.com.br" class="btn btn-outline-info w-100 mb-2" target="_blank">
+                            <i class="fas fa-chart-line"></i> Grafana Dashboards
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="https://sentry.aviladevops.com.br" class="btn btn-outline-danger w-100 mb-2" target="_blank">
+                            <i class="fas fa-bug"></i> Sentry Error Tracking
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

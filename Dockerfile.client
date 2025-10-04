@@ -1,0 +1,67 @@
+# Ávila DevOps SaaS - Cliente Local Dockerfile
+# Dockerfile simplificado para execução local pelos clientes
+
+FROM python:3.11-slim
+
+# Instalar dependências básicas
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    libffi7 \
+    libssl3 \
+    libjpeg62-turbo \
+    libpng16-16 \
+    zlib1g \
+    libfreetype6 \
+    liblcms2-2 \
+    libopenjp2-7 \
+    libtiff5 \
+    libwebp6 \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Definir variáveis de ambiente para desenvolvimento local
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    DJANGO_SETTINGS_MODULE=core.settings \
+    ENVIRONMENT=development \
+    DEBUG=1
+
+# Criar usuário não-root para segurança
+RUN groupadd -g 1000 django && useradd -u 1000 -g django django
+
+# Definir diretório de trabalho
+WORKDIR /app
+
+# Instalar dependências Python
+COPY requirements*.txt ./
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Criar diretórios necessários
+RUN mkdir -p /app/staticfiles /app/media /app/data /app/logs && \
+    chown -R django:django /app
+
+# Copiar código da aplicação
+COPY --chown=django:django . .
+
+# Instalar script de configuração inicial
+COPY --chown=django:django scripts/client-setup.py /usr/local/bin/
+RUN chmod +x /usr/local/bin/client-setup.py
+
+# Mudar para usuário não-root
+USER django
+
+# Executar migrações e coletar estáticos
+RUN python manage.py migrate --noinput && \
+    python manage.py collectstatic --noinput
+
+# Expor porta
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health/ || exit 1
+
+# Comando padrão - iniciar servidor de desenvolvimento
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

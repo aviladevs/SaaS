@@ -28,6 +28,7 @@ urlpatterns = [
     path('portfolio/', include('apps.portfolio.urls')),
     path('blog/', include('apps.blog.urls')),
     path('contact/', include('apps.contact.urls')),
+    path('ferrovelho/', include('apps.ferrovelho.urls')),
     path('', include('core.app_urls')),
 ]
 
