@@ -1,9 +1,13 @@
 dispatch:
   # Landing Page - domínio principal
   - url: "aviladevops.com.br/*"
-    service: landing-page
+    service: landing
 
-  # Sistema de reciclagem
+  # App Principal SaaS
+  - url: "app.aviladevops.com.br/*"
+    service: default
+
+  # Sistema de reciclagem/gestão
   - url: "sistema.aviladevops.com.br/*"
     service: sistema
 
@@ -13,4 +17,8 @@ dispatch:
 
   # Clínica Management
   - url: "clinica.aviladevops.com.br/*"
-    service: default
+    service: clinica
+
+  # Admin Portal
+  - url: "admin.aviladevops.com.br/*"
+    service: admin
