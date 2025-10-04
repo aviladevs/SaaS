@@ -1,0 +1,1 @@
+# Signals for blog app
