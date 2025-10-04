@@ -1,5 +1,24 @@
 # ⚡ DEPLOY RÁPIDO - 3 COMANDOS
 
+## 🔍 Verificar se está pronto
+
+Antes de fazer o deploy, verifique se tudo está configurado:
+
+```powershell
+# Verificação completa
+python check_deploy.py
+
+# Ou resposta rápida sim/não
+python verificar_deploy.py
+```
+
+Para automação/CI, use o modo não-interativo:
+```powershell
+python check_deploy.py --no-prompt
+```
+
+---
+
 ## 🚀 Deploy em 3 Minutos
 
 ### 1️⃣ Preparar
