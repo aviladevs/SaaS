@@ -11,12 +11,12 @@ def log_failed_login(sender, credentials, request, **kwargs):
     """Log tentativas de login falhadas"""
     username = credentials.get('username', 'unknown')
     client_ip = request.META.get('REMOTE_ADDR', 'unknown')
-    
+
     logger.warning(f"Failed login attempt - Username: {username}, IP: {client_ip}")
 
 @receiver(user_logged_in)
 def log_successful_login(sender, user, request, **kwargs):
     """Log logins bem-sucedidos"""
     client_ip = request.META.get('REMOTE_ADDR', 'unknown')
-    
+
     logger.info(f"Successful login - User: {user.username}, IP: {client_ip}")

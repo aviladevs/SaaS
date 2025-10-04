@@ -10,7 +10,7 @@ class ProjectCategory(models.Model):
     name = models.CharField(_('Nome'), max_length=100)
     slug = models.SlugField(_('Slug'), unique=True, blank=True)
     description = models.TextField(_('Descrição'), blank=True)
-    color = models.CharField(_('Cor'), max_length=7, default='#007bff')
+    color = models.CharField(_('Cor'), max_length=7, default='#007bf')
     is_active = models.BooleanField(_('Ativo'), default=True)
     order = models.PositiveIntegerField(_('Ordem'), default=0)
 

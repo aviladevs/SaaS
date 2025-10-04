@@ -4,9 +4,9 @@ from .models import NFe, NFeItem, CTe, ImportLog
 
 @admin.register(NFe)
 class NFeAdmin(admin.ModelAdmin):
-    list_display = ['numero_nf', 'emit_nome', 'dest_nome', 'valor_total', 'data_emissao']
-    list_filter = ['data_emissao', 'emit_uf', 'status_nfe']
-    search_fields = ['chave_acesso', 'numero_nf', 'emit_nome', 'dest_nome', 'emit_cnpj']
+    list_display = ['numero_n', 'emit_nome', 'dest_nome', 'valor_total', 'data_emissao']
+    list_filter = ['data_emissao', 'emit_u', 'status_nfe']
+    search_fields = ['chave_acesso', 'numero_n', 'emit_nome', 'dest_nome', 'emit_cnpj']
     date_hierarchy = 'data_emissao'
     readonly_fields = ['data_importacao']
 
@@ -21,7 +21,7 @@ class NFeItemAdmin(admin.ModelAdmin):
 @admin.register(CTe)
 class CTeAdmin(admin.ModelAdmin):
     list_display = ['numero_ct', 'emit_nome', 'dest_nome', 'valor_total', 'data_emissao']
-    list_filter = ['data_emissao', 'emit_uf', 'modal']
+    list_filter = ['data_emissao', 'emit_u', 'modal']
     search_fields = ['chave_acesso', 'numero_ct', 'emit_nome', 'dest_nome']
     date_hierarchy = 'data_emissao'
     readonly_fields = ['data_importacao']

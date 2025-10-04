@@ -56,10 +56,10 @@ class AgendamentoAPITest(APITestCase):
             servico=self.servico,
             horario=datetime.now() + timedelta(days=1)
         )
-        
+
         url = '/api/agendamentos/'
         response = self.client.get(url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
@@ -73,6 +73,6 @@ class AgendamentoAPITest(APITestCase):
             'observacoes': 'Teste API'
         }
         response = self.client.post(url, data)
-        
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Agendamento.objects.count(), 1)

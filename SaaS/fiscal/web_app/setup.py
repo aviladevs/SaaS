@@ -40,11 +40,11 @@ def run_migrations():
 def create_superuser():
     """Cria superusuário se não existir"""
     print_header("CRIANDO SUPERUSUÁRIO")
-    
+
     if User.objects.filter(username='admin').exists():
         print("✓ Superusuário 'admin' já existe")
         return True
-    
+
     try:
         User.objects.create_superuser(
             username='admin',
@@ -81,7 +81,7 @@ def test_database():
         cursor = connection.cursor()
         cursor.execute("SELECT 1")
         print("✓ Conexão com banco de dados OK!")
-        
+
         # Mostra informações do banco
         from django.conf import settings
         db = settings.DATABASES['default']
@@ -91,7 +91,7 @@ def test_database():
             print(f"  Database: {db.get('NAME', 'N/A')}")
         else:
             print(f"  Database: {db.get('NAME', 'SQLite')}")
-        
+
         return True
     except Exception as e:
         print(f"✗ Erro de conexão: {e}")
@@ -103,17 +103,17 @@ def show_stats():
     print_header("ESTATÍSTICAS DO SISTEMA")
     try:
         from core.models import NFe, CTe, ImportLog
-        
+
         nfe_count = NFe.objects.count()
         cte_count = CTe.objects.count()
         log_count = ImportLog.objects.count()
         user_count = User.objects.count()
-        
+
         print(f"\n  📄 NFes: {nfe_count}")
         print(f"  🚚 CTes: {cte_count}")
         print(f"  📋 Logs: {log_count}")
         print(f"  👥 Usuários: {user_count}")
-        
+
         return True
     except Exception as e:
         print(f"✗ Erro ao buscar estatísticas: {e}")
@@ -142,7 +142,7 @@ def main():
     print("\n" + "="*60)
     print("  🚀 XML MANAGER - SETUP INICIAL")
     print("="*60)
-    
+
     steps = [
         ("Migrando banco de dados", run_migrations),
         ("Criando superusuário", create_superuser),
@@ -150,20 +150,20 @@ def main():
         ("Testando banco de dados", test_database),
         ("Verificando estatísticas", show_stats),
     ]
-    
+
     success_count = 0
     for step_name, step_func in steps:
         if step_func():
             success_count += 1
-    
+
     # Resultado final
     print_header("RESULTADO FINAL")
     print(f"\n  ✓ {success_count}/{len(steps)} etapas concluídas")
-    
+
     if success_count == len(steps):
         print("\n  🎉 SETUP CONCLUÍDO COM SUCESSO!")
         show_urls()
-        
+
         print_header("PRÓXIMOS PASSOS")
         print("\n  1. Inicie o servidor:")
         print("     python manage.py runserver")
@@ -179,7 +179,7 @@ def main():
     else:
         print("\n  ⚠️  SETUP CONCLUÍDO COM AVISOS")
         print("\n  Verifique os erros acima e tente novamente.")
-    
+
     print("\n" + "="*60 + "\n")
 
 

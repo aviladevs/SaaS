@@ -11,7 +11,7 @@ class ServiceCategory(models.Model):
     slug = models.SlugField(_('Slug'), unique=True, blank=True)
     description = models.TextField(_('Descrição'), blank=True)
     icon = models.CharField(_('Ícone'), max_length=50, help_text='Nome do ícone do Font Awesome')
-    color = models.CharField(_('Cor'), max_length=7, default='#007bff', help_text='Cor em hexadecimal')
+    color = models.CharField(_('Cor'), max_length=7, default='#007bf', help_text='Cor em hexadecimal')
     is_active = models.BooleanField(_('Ativo'), default=True)
     order = models.PositiveIntegerField(_('Ordem'), default=0)
 

@@ -19,7 +19,7 @@ def check_gcloud():
     """Verifica se gcloud está instalado"""
     print_header("VERIFICANDO GOOGLE CLOUD SDK")
     try:
-        result = subprocess.run(['gcloud', '--version'], 
+        result = subprocess.run(['gcloud', '--version'],
                               capture_output=True, text=True, timeout=5)
         if result.returncode == 0:
             print("✅ Google Cloud SDK instalado")
@@ -41,7 +41,7 @@ def check_authenticated():
     """Verifica se está autenticado"""
     print_header("VERIFICANDO AUTENTICAÇÃO")
     try:
-        result = subprocess.run(['gcloud', 'auth', 'list'], 
+        result = subprocess.run(['gcloud', 'auth', 'list'],
                               capture_output=True, text=True, timeout=10)
         if result.returncode == 0 and 'ACTIVE' in result.stdout:
             print("✅ Autenticado no Google Cloud")
@@ -59,7 +59,7 @@ def check_project():
     """Verifica se projeto está configurado"""
     print_header("VERIFICANDO PROJETO")
     try:
-        result = subprocess.run(['gcloud', 'config', 'get-value', 'project'], 
+        result = subprocess.run(['gcloud', 'config', 'get-value', 'project'],
                               capture_output=True, text=True, timeout=10)
         if result.returncode == 0 and result.stdout.strip():
             project = result.stdout.strip()
@@ -79,7 +79,7 @@ def check_project():
 def check_files():
     """Verifica se arquivos necessários existem"""
     print_header("VERIFICANDO ARQUIVOS")
-    
+
     required_files = {
         'app.yaml': 'Configuração App Engine',
         'requirements.txt': 'Dependências Python',
@@ -87,7 +87,7 @@ def check_files():
         'xml_manager/settings.py': 'Settings Django',
         'xml_manager/settings_production.py': 'Settings produção',
     }
-    
+
     all_ok = True
     for file, desc in required_files.items():
         if Path(file).exists():
@@ -95,14 +95,14 @@ def check_files():
         else:
             print(f"❌ {file:<35} - FALTANDO!")
             all_ok = False
-    
+
     return all_ok
 
 
 def check_staticfiles():
     """Verifica se static files foram coletados"""
     print_header("VERIFICANDO ARQUIVOS ESTÁTICOS")
-    
+
     static_dir = Path('staticfiles')
     if static_dir.exists() and list(static_dir.iterdir()):
         print(f"✅ Arquivos estáticos coletados ({len(list(static_dir.rglob('*')))} arquivos)")
@@ -118,7 +118,7 @@ def check_app_engine():
     """Verifica se App Engine existe"""
     print_header("VERIFICANDO APP ENGINE")
     try:
-        result = subprocess.run(['gcloud', 'app', 'describe'], 
+        result = subprocess.run(['gcloud', 'app', 'describe'],
                               capture_output=True, text=True, timeout=10)
         if result.returncode == 0:
             print("✅ App Engine já configurado")
@@ -151,7 +151,7 @@ def main():
     print("\n" + "="*60)
     print("  🚀 VERIFICAÇÃO PRÉ-DEPLOY - XML MANAGER")
     print("="*60)
-    
+
     checks = [
         ("Google Cloud SDK", check_gcloud),
         ("Autenticação", check_authenticated),
@@ -160,19 +160,19 @@ def main():
         ("Arquivos estáticos", check_staticfiles),
         ("App Engine", check_app_engine),
     ]
-    
+
     results = []
     for name, check_func in checks:
         results.append(check_func())
-    
+
     # Resultado final
     print_header("RESULTADO FINAL")
-    
+
     passed = sum(results)
     total = len(results)
-    
+
     print(f"\n✅ Verificações passadas: {passed}/{total}")
-    
+
     if passed == total:
         print("\n🎉 TUDO PRONTO PARA DEPLOY!")
         show_deploy_command()
@@ -183,7 +183,7 @@ def main():
         print("\n❌ AINDA NÃO ESTÁ PRONTO")
         print("\nCorrija os erros acima antes de fazer deploy.")
         print("\n📚 Consulte: DEPLOY_RAPIDO.md ou DEPLOY.md")
-    
+
     print("\n" + "="*60 + "\n")
 
 

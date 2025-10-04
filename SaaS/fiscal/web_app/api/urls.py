@@ -15,12 +15,12 @@ router.register('logs', views.ImportLogViewSet, basename='logs')
 urlpatterns = [
     # Auth token para app mobile
     path('auth/login/', obtain_auth_token, name='api_token_auth'),
-    
+
     # Endpoints customizados
     path('dashboard/', views.dashboard_api, name='api_dashboard'),
     path('statistics/', views.statistics_api, name='api_statistics'),
     path('search/', views.search_api, name='api_search'),
-    
+
     # Router URLs
     path('', include(router.urls)),
 ]

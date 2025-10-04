@@ -12,7 +12,7 @@ class Cliente(models.Model):
         help_text="Nome completo do cliente"
     )
     whatsapp = models.CharField(
-        max_length=20, 
+        max_length=20,
         unique=True,
         validators=[
             RegexValidator(
@@ -23,12 +23,12 @@ class Cliente(models.Model):
         help_text="WhatsApp no formato internacional"
     )
     email = models.EmailField(
-        blank=True, 
+        blank=True,
         null=True,
         help_text="Email para confirmações (opcional)"
     )
     data_nascimento = models.DateField(
-        blank=True, 
+        blank=True,
         null=True,
         help_text="Data de nascimento para controle de idade"
     )
@@ -95,14 +95,14 @@ class Servico(models.Model):
         help_text="Duração em minutos (mínimo 15)"
     )
     valor = models.DecimalField(
-        max_digits=8, 
+        max_digits=8,
         decimal_places=2,
         validators=[MinValueValidator(0.01)],
         help_text="Valor do serviço em reais"
     )
     cor_calendario = models.CharField(
         max_length=7,
-        default='#007bff',
+        default='#007bf',
         help_text="Cor para exibição no calendário (#RRGGBB)"
     )
     ativo = models.BooleanField(
@@ -141,12 +141,12 @@ class Agendamento(models.Model):
     ]
 
     cliente = models.ForeignKey(
-        Cliente, 
+        Cliente,
         on_delete=models.CASCADE,
         help_text="Cliente do agendamento"
     )
     servico = models.ForeignKey(
-        Servico, 
+        Servico,
         on_delete=models.CASCADE,
         help_text="Serviço agendado"
     )
@@ -154,7 +154,7 @@ class Agendamento(models.Model):
         help_text="Data e hora do agendamento"
     )
     status = models.CharField(
-        max_length=20, 
+        max_length=20,
         choices=STATUS_CHOICES,
         default='confirmado',
         help_text="Status atual do agendamento"
@@ -198,17 +198,17 @@ class Agendamento(models.Model):
             # Não permitir agendamento no passado
             if self.horario < timezone.now():
                 raise ValidationError("Não é possível agendar no passado")
-            
+
             # Verificar conflito de horários apenas para agendamentos confirmados
             if self.status == 'confirmado':
                 fim_agendamento = self.horario + timedelta(minutes=self.servico.duracao_minutos)
-                
+
                 conflitos = Agendamento.objects.filter(
                     status='confirmado',
                     horario__lt=fim_agendamento,
                     horario__gte=self.horario - timedelta(minutes=self.servico.duracao_minutos)
                 ).exclude(pk=self.pk)
-                
+
                 if conflitos.exists():
                     raise ValidationError("Existe conflito de horário com outro agendamento")
 
@@ -216,10 +216,10 @@ class Agendamento(models.Model):
         # Definir valor cobrado se não especificado
         if not self.valor_cobrado:
             self.valor_cobrado = self.servico.valor
-        
+
         # Executar validações
         self.full_clean()
-        
+
         super().save(*args, **kwargs)
 
     @property
@@ -231,7 +231,7 @@ class Agendamento(models.Model):
     def pode_cancelar(self):
         """Verifica se o agendamento pode ser cancelado"""
         return (
-            self.status in ['confirmado'] and 
+            self.status in ['confirmado'] and
             self.horario > timezone.now() + timedelta(hours=2)
         )
 
@@ -239,6 +239,6 @@ class Agendamento(models.Model):
     def esta_atrasado(self):
         """Verifica se o agendamento está atrasado"""
         return (
-            self.status == 'confirmado' and 
+            self.status == 'confirmado' and
             self.horario < timezone.now()
         )

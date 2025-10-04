@@ -7,7 +7,7 @@ from core.models import NFe, NFeItem, CTe, ImportLog
 
 class NFeItemSerializer(serializers.ModelSerializer):
     """Serializer para itens de NFe"""
-    
+
     class Meta:
         model = NFeItem
         fields = [
@@ -19,11 +19,11 @@ class NFeItemSerializer(serializers.ModelSerializer):
 
 class NFeListSerializer(serializers.ModelSerializer):
     """Serializer para listagem de NFes (resumido)"""
-    
+
     class Meta:
         model = NFe
         fields = [
-            'id', 'chave_acesso', 'numero_nf', 'serie', 'data_emissao',
+            'id', 'chave_acesso', 'numero_n', 'serie', 'data_emissao',
             'emit_cnpj', 'emit_nome', 'dest_nome', 'valor_total',
             'status_nfe'
         ]
@@ -31,21 +31,21 @@ class NFeListSerializer(serializers.ModelSerializer):
 
 class NFeDetailSerializer(serializers.ModelSerializer):
     """Serializer para detalhes completos de NFe"""
-    
+
     itens = NFeItemSerializer(many=True, read_only=True)
     total_itens = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = NFe
         fields = '__all__'
-    
+
     def get_total_itens(self, obj):
         return obj.itens.count()
 
 
 class CTeListSerializer(serializers.ModelSerializer):
     """Serializer para listagem de CTes (resumido)"""
-    
+
     class Meta:
         model = CTe
         fields = [
@@ -57,7 +57,7 @@ class CTeListSerializer(serializers.ModelSerializer):
 
 class CTeDetailSerializer(serializers.ModelSerializer):
     """Serializer para detalhes completos de CTe"""
-    
+
     class Meta:
         model = CTe
         fields = '__all__'
@@ -65,9 +65,9 @@ class CTeDetailSerializer(serializers.ModelSerializer):
 
 class ImportLogSerializer(serializers.ModelSerializer):
     """Serializer para logs de importação"""
-    
+
     usuario_nome = serializers.CharField(source='usuario.username', read_only=True)
-    
+
     class Meta:
         model = ImportLog
         fields = [
@@ -78,23 +78,23 @@ class ImportLogSerializer(serializers.ModelSerializer):
 
 class DashboardSerializer(serializers.Serializer):
     """Serializer para dados do dashboard"""
-    
+
     nfe_total = serializers.IntegerField()
     nfe_mes = serializers.IntegerField()
     nfe_valor_total = serializers.DecimalField(max_digits=15, decimal_places=2)
     nfe_valor_mes = serializers.DecimalField(max_digits=15, decimal_places=2)
-    
+
     cte_total = serializers.IntegerField()
     cte_mes = serializers.IntegerField()
     cte_valor_total = serializers.DecimalField(max_digits=15, decimal_places=2)
     cte_valor_mes = serializers.DecimalField(max_digits=15, decimal_places=2)
-    
+
     ultimos_logs = ImportLogSerializer(many=True)
 
 
 class StatisticsSerializer(serializers.Serializer):
     """Serializer para estatísticas e análises"""
-    
+
     top_emitentes = serializers.ListField()
     top_produtos = serializers.ListField()
     top_rotas = serializers.ListField()

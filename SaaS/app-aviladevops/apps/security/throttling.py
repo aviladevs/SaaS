@@ -47,21 +47,21 @@ class PasswordResetThrottle(AnonRateThrottle):
 
 class BruteForceProtection:
     """Proteção contra ataques de força bruta"""
-    
+
     @staticmethod
     def check_failed_attempts(ip_address: str, max_attempts: int = 10) -> bool:
         """Verifica tentativas de login falhadas"""
         cache_key = f'failed_login_{ip_address}'
         attempts = cache.get(cache_key, 0)
         return attempts < max_attempts
-    
+
     @staticmethod
     def record_failed_attempt(ip_address: str, timeout: int = 3600):
         """Registra tentativa de login falhada"""
         cache_key = f'failed_login_{ip_address}'
         attempts = cache.get(cache_key, 0)
         cache.set(cache_key, attempts + 1, timeout)
-    
+
     @staticmethod
     def clear_failed_attempts(ip_address: str):
         """Limpa tentativas após login bem-sucedido"""

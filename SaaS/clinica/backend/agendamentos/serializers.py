@@ -6,11 +6,11 @@ from .models import Cliente, Servico, Agendamento
 
 class ClienteSerializer(serializers.ModelSerializer):
     """Serializer completo para Cliente com validações"""
-    
+
     idade = serializers.ReadOnlyField()
     total_agendamentos = serializers.ReadOnlyField()
     ultimo_agendamento = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Cliente
         fields = [
@@ -37,15 +37,15 @@ class ClienteSerializer(serializers.ModelSerializer):
         import re
         # Remover caracteres não numéricos exceto +
         clean_number = re.sub(r'[^\d+]', '', value)
-        
+
         if not clean_number.startswith('+'):
             clean_number = '+55' + clean_number
-            
+
         if len(clean_number) < 13 or len(clean_number) > 16:
             raise serializers.ValidationError(
                 "WhatsApp deve ter entre 13 e 16 dígitos incluindo código do país"
             )
-        
+
         return clean_number
 
     def validate_email(self, value):
@@ -57,9 +57,9 @@ class ClienteSerializer(serializers.ModelSerializer):
 
 class ServicoSerializer(serializers.ModelSerializer):
     """Serializer completo para Serviço com métricas"""
-    
+
     agendamentos_mes_atual = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = Servico
         fields = [
@@ -90,7 +90,7 @@ class ServicoSerializer(serializers.ModelSerializer):
 
 class AgendamentoCreateSerializer(serializers.ModelSerializer):
     """Serializer específico para criação de agendamentos"""
-    
+
     class Meta:
         model = Agendamento
         fields = [
@@ -100,51 +100,51 @@ class AgendamentoCreateSerializer(serializers.ModelSerializer):
     def validate_horario(self, value):
         """Validação específica para horário"""
         now = timezone.now()
-        
+
         # Não permitir agendamento no passado
         if value < now:
             raise serializers.ValidationError("Não é possível agendar no passado")
-        
+
         # Não permitir agendamento muito distante (1 ano)
         if value > now + timedelta(days=365):
             raise serializers.ValidationError("Não é possível agendar com mais de 1 ano de antecedência")
-        
+
         # Verificar horário comercial (8h às 19h)
         if value.hour < 8 or value.hour >= 19:
             raise serializers.ValidationError("Agendamentos devem ser entre 8h e 19h")
-        
+
         # Verificar se não é domingo
         if value.weekday() == 6:  # 6 = domingo
             raise serializers.ValidationError("Não atendemos aos domingos")
-        
+
         return value
 
     def validate(self, data):
         """Validação cruzada de dados"""
         horario = data.get('horario')
         servico = data.get('servico')
-        
+
         if horario and servico:
             # Verificar conflito de horários
             fim_agendamento = horario + timedelta(minutes=servico.duracao_minutos)
-            
+
             conflitos = Agendamento.objects.filter(
                 status='confirmado',
                 horario__lt=fim_agendamento,
                 horario__gte=horario - timedelta(minutes=servico.duracao_minutos)
             )
-            
+
             if conflitos.exists():
                 raise serializers.ValidationError({
                     'horario': 'Existe conflito de horário com outro agendamento'
                 })
-        
+
         return data
 
 
 class AgendamentoDetailSerializer(serializers.ModelSerializer):
     """Serializer completo para visualização de agendamentos"""
-    
+
     cliente_nome = serializers.CharField(source='cliente.nome', read_only=True)
     cliente_whatsapp = serializers.CharField(source='cliente.whatsapp', read_only=True)
     servico_nome = serializers.CharField(source='servico.nome', read_only=True)
@@ -152,7 +152,7 @@ class AgendamentoDetailSerializer(serializers.ModelSerializer):
     horario_fim = serializers.ReadOnlyField()
     pode_cancelar = serializers.ReadOnlyField()
     esta_atrasado = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = Agendamento
         fields = [
@@ -167,7 +167,7 @@ class AgendamentoDetailSerializer(serializers.ModelSerializer):
 
 class AgendamentoUpdateSerializer(serializers.ModelSerializer):
     """Serializer específico para atualização de agendamentos"""
-    
+
     class Meta:
         model = Agendamento
         fields = ['status', 'observacoes', 'valor_cobrado']
@@ -176,7 +176,7 @@ class AgendamentoUpdateSerializer(serializers.ModelSerializer):
         """Validação para mudança de status"""
         if self.instance:
             status_atual = self.instance.status
-            
+
             # Regras de transição de status
             transicoes_validas = {
                 'confirmado': ['concluido', 'cancelado', 'reagendado', 'falta'],
@@ -185,18 +185,18 @@ class AgendamentoUpdateSerializer(serializers.ModelSerializer):
                 'concluido': [],  # Concluído não pode mudar
                 'falta': ['reagendado']  # Falta pode ser reagendada
             }
-            
+
             if value not in transicoes_validas.get(status_atual, []):
                 raise serializers.ValidationError(
                     f"Não é possível mudar status de '{status_atual}' para '{value}'"
                 )
-        
+
         return value
 
 
 class DashboardSerializer(serializers.Serializer):
     """Serializer para dados do dashboard"""
-    
+
     agendamentos_hoje = serializers.IntegerField()
     agendamentos_semana = serializers.IntegerField()
     agendamentos_mes = serializers.IntegerField()
@@ -208,7 +208,7 @@ class DashboardSerializer(serializers.Serializer):
 
 class CalendarioSerializer(serializers.Serializer):
     """Serializer para eventos do calendário"""
-    
+
     id = serializers.IntegerField()
     title = serializers.CharField()
     start = serializers.DateTimeField()

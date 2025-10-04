@@ -23,7 +23,7 @@ def contact_form(request):
             # Enviar email
             send_mail(
                 subject=f"Contato via site: {data.get('subject', 'Sem assunto')}",
-                message=f"""
+                message="""
 Nome: {data.get('name')}
 Email: {data.get('email')}
 Telefone: {data.get('phone', 'Não informado')}

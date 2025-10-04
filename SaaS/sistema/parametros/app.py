@@ -28,7 +28,7 @@ def salvar_registro(registro):
     df = pd.concat([df, pd.DataFrame([registro])], ignore_index=True)
     df.to_csv(DATA_FILE, index=False)
 
-def gerar_pdf(df, filename="relatorio.pdf"):
+def gerar_pdf(df, filename="relatorio.pd"):
     pdf = FPDF()
     pdf.add_page()
     if os.path.exists(LOGO_FILE):
@@ -118,8 +118,8 @@ with abas[2]:
 
         if st.button("📑 Gerar PDF"):
             gerar_pdf(df)
-            with open("relatorio.pdf", "rb") as f:
-                st.download_button("⬇️ Baixar Relatório PDF", f, "relatorio.pdf")
+            with open("relatorio.pd", "rb") as f:
+                st.download_button("⬇️ Baixar Relatório PDF", f, "relatorio.pd")
 
         st.download_button("⬇️ Baixar Excel", df.to_csv(index=False).encode("utf-8"), "registros.csv")
     else:
