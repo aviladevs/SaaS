@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block description %}{{ description }}{% endblock %}">
+    <meta name="description" content="{% block description %}Ávila DevOps - Transformando ideias em soluções tecnológicas excepcionais{% endblock %}">
     <meta name="keywords" content="DevOps, desenvolvimento web, tecnologia, transformação digital, Ávila DevOps">
     <meta name="author" content="Ávila DevOps">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://aviladevops.com.br/">
-    <meta property="og:title" content="{% block title %}{{ title }}{% endblock %}">
-    <meta property="og:description" content="{% block description %}{{ description }}{% endblock %}">
+    <meta property="og:title" content="{% block title %}Ávila DevOps{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% block description %}Ávila DevOps - Transformando ideias em soluções tecnológicas excepcionais{% endblock %}{% endblock %}">
     <meta property="og:image" content="https://aviladevops.com.br/static/images/og-image.jpg">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://aviladevops.com.br/">
-    <meta property="twitter:title" content="{% block title %}{{ title }}{% endblock %}">
-    <meta property="twitter:description" content="{% block description %}{{ description }}{% endblock %}">
+    <meta property="twitter:title" content="{% block twitter_title %}{% block title %}Ávila DevOps{% endblock %}{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}{% block description %}Ávila DevOps - Transformando ideias em soluções tecnológicas excepcionais{% endblock %}{% endblock %}">
     <meta property="twitter:image" content="https://aviladevops.com.br/static/images/og-image.jpg">
 
-    <title>{% block title %}{{ title }}{% endblock %}</title>
+    <title>{% block title %}Ávila DevOps{% endblock %}</title>
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -33,6 +33,7 @@
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
     <!-- Custom CSS -->
+    {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
     {% block extra_head %}{% endblock %}
@@ -52,18 +53,16 @@
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <a href="{% url 'core:index' %}">
-                    <img src="{% static 'images/logo.png' %}" alt="Ávila DevOps Logo">
+                <a href="/">
+                    <i class="fas fa-code"></i>
                     <span>Ávila DevOps</span>
                 </a>
             </div>
 
             <div class="nav-menu" id="nav-menu">
-                <a href="{% url 'core:index' %}" class="nav-link">Início</a>
-                <a href="{% url 'core:services' %}" class="nav-link">Serviços</a>
-                <a href="{% url 'core:portfolio' %}" class="nav-link">Portfólio</a>
-                <a href="{% url 'core:about' %}" class="nav-link">Sobre</a>
-                <a href="#contact" class="nav-link">Contato</a>
+                <a href="/" class="nav-link">Início</a>
+                <a href="/api/health/" class="nav-link">API</a>
+                <a href="/admin/" class="nav-link">Admin</a>
             </div>
 
             <div class="nav-actions">
@@ -79,7 +78,14 @@
 
     <!-- Main Content -->
     <main>
-        {% block content %}{% endblock %}
+        {% block content %}
+        <div class="hero-section">
+            <div class="container">
+                <h1>Bem-vindo ao SaaS Ávila DevOps</h1>
+                <p>Sistema em funcionamento com sucesso!</p>
+            </div>
+        </div>
+        {% endblock %}
     </main>
 
     <!-- Footer -->
@@ -88,7 +94,7 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <div class="footer-logo">
-                        <img src="{% static 'images/logo-white.png' %}" alt="Ávila DevOps">
+                        <i class="fas fa-code"></i>
                         <p>Transformando ideias em soluções tecnológicas excepcionais desde 2014.</p>
                     </div>
                     <div class="footer-social">
@@ -102,18 +108,18 @@
                 <div class="footer-section">
                     <h4>Serviços</h4>
                     <ul>
-                        <li><a href="{% url 'core:services' %}">Desenvolvimento Web</a></li>
-                        <li><a href="{% url 'core:services' %}">DevOps & Cloud</a></li>
-                        <li><a href="{% url 'core:services' %}">Consultoria em TI</a></li>
-                        <li><a href="{% url 'core:services' %}">Aplicativos Mobile</a></li>
+                        <li><a href="#">Desenvolvimento Web</a></li>
+                        <li><a href="#">DevOps & Cloud</a></li>
+                        <li><a href="#">Consultoria em TI</a></li>
+                        <li><a href="#">Aplicativos Mobile</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-section">
                     <h4>Empresa</h4>
                     <ul>
-                        <li><a href="{% url 'core:about' %}">Sobre Nós</a></li>
-                        <li><a href="{% url 'core:portfolio' %}">Portfólio</a></li>
+                        <li><a href="#">Sobre Nós</a></li>
+                        <li><a href="#">Portfólio</a></li>
                         <li><a href="#">Carreiras</a></li>
                         <li><a href="#">Blog</a></li>
                     </ul>
@@ -144,7 +150,175 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="{% static 'js/main.js' %}"></script>
     {% block extra_scripts %}{% endblock %}
+
+    <style>
+        .hero-section {
+            padding: 100px 0;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .navbar {
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+        .nav-logo a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+        }
+        .nav-link {
+            text-decoration: none;
+            color: #333;
+            transition: color 0.3s;
+        }
+        .nav-link:hover {
+            color: #667eea;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .nav-toggle span {
+            width: 25px;
+            height: 3px;
+            background: #333;
+            transition: all 0.3s;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            padding: 3rem 0 1rem;
+        }
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .footer-section a:hover {
+            color: #667eea;
+        }
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .footer-social a {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.3s;
+        }
+        .footer-social a:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        .footer-bottom {
+            border-top: 1px solid #555;
+            padding-top: 1rem;
+            text-align: center;
+        }
+        .footer-bottom-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .footer-links {
+            display: flex;
+            gap: 1rem;
+        }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            padding-top: 80px;
+        }
+        main {
+            min-height: calc(100vh - 200px);
+        }
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+            .nav-toggle {
+                display: flex;
+            }
+            .footer-bottom-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
 </body>
 </html>
