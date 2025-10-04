@@ -1,0 +1,157 @@
+# Prometheus Configuration for Ávila DevOps SaaS
+# Comprehensive monitoring setup with service discovery
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'aviladevops-saas'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+
+# Load alerting rules
+rule_files:
+  - "/etc/prometheus/alerts.yml"
+  - "/etc/prometheus/rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          tier: 'monitoring'
+
+  # Node Exporter for infrastructure metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node-exporter'
+          tier: 'infrastructure'
+
+  # PostgreSQL Exporter
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgresql'
+          tier: 'database'
+
+  # Redis Exporter
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+          tier: 'cache'
+
+  # Landing Page Django Application
+  - job_name: 'landing-page'
+    static_configs:
+      - targets: ['landing-page:8000']
+        labels:
+          service: 'landing-page'
+          tier: 'frontend'
+          framework: 'django'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Recycling System Django Application
+  - job_name: 'recycling-system'
+    static_configs:
+      - targets: ['recycling-system:8001']
+        labels:
+          service: 'recycling-system'
+          tier: 'backend'
+          framework: 'django'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Fiscal System Django Application
+  - job_name: 'fiscal-system'
+    static_configs:
+      - targets: ['fiscal-system:8002']
+        labels:
+          service: 'fiscal-system'
+          tier: 'backend'
+          framework: 'django'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Main App (Admin) Django Application
+  - job_name: 'main-app'
+    static_configs:
+      - targets: ['main-app:8003']
+        labels:
+          service: 'main-app'
+          tier: 'backend'
+          framework: 'django'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Clínica Management Next.js Application
+  - job_name: 'clinica-system'
+    static_configs:
+      - targets: ['clinica-system:3000']
+        labels:
+          service: 'clinica-system'
+          tier: 'frontend'
+          framework: 'nextjs'
+    metrics_path: '/api/metrics'
+    scrape_interval: 10s
+
+  # Elasticsearch metrics
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch:9200']
+        labels:
+          service: 'elasticsearch'
+          tier: 'search'
+    metrics_path: '/_prometheus/metrics'
+    scrape_interval: 30s
+
+  # Nginx metrics
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+        labels:
+          service: 'nginx'
+          tier: 'loadbalancer'
+    scrape_interval: 15s
+
+  # Celery Worker metrics
+  - job_name: 'celery-worker'
+    static_configs:
+      - targets: ['celery-exporter:9808']
+        labels:
+          service: 'celery-worker'
+          tier: 'async'
+    scrape_interval: 20s
+
+  # Jaeger metrics
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger:14269']
+        labels:
+          service: 'jaeger'
+          tier: 'tracing'
+    scrape_interval: 30s
+
+  # Grafana metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          service: 'grafana'
+          tier: 'monitoring'
+    metrics_path: '/metrics'
+    scrape_interval: 30s

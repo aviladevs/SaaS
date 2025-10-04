@@ -1,0 +1,150 @@
+{
+  "dashboard": {
+    "title": "Infrastructure Monitoring - Ávila DevOps SaaS",
+    "tags": ["saas", "infrastructure", "resources"],
+    "timezone": "browser",
+    "editable": true,
+    "graphTooltip": 1,
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "CPU Usage (%)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "instance:node_cpu:usage_percent",
+            "legendFormat": "{{instance}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "CPU %", "min": 0, "max": 100},
+          {"format": "short", "show": false}
+        ],
+        "thresholds": [
+          {"value": 80, "colorMode": "warning", "op": "gt", "fill": false, "line": true},
+          {"value": 95, "colorMode": "critical", "op": "gt", "fill": true, "line": true}
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Memory Usage (%)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "instance:node_memory:usage_percent",
+            "legendFormat": "{{instance}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Memory %", "min": 0, "max": 100},
+          {"format": "short", "show": false}
+        ],
+        "thresholds": [
+          {"value": 85, "colorMode": "warning", "op": "gt", "fill": false, "line": true},
+          {"value": 95, "colorMode": "critical", "op": "gt", "fill": true, "line": true}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Disk Usage (%)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "instance:node_disk:usage_percent",
+            "legendFormat": "{{instance}} - {{mountpoint}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Disk %", "min": 0, "max": 100},
+          {"format": "short", "show": false}
+        ],
+        "thresholds": [
+          {"value": 85, "colorMode": "warning", "op": "gt", "fill": false, "line": true},
+          {"value": 95, "colorMode": "critical", "op": "gt", "fill": true, "line": true}
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Network I/O",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "instance:node_network:receive_bytes:rate5m",
+            "legendFormat": "{{instance}} - RX"
+          },
+          {
+            "expr": "instance:node_network:transmit_bytes:rate5m",
+            "legendFormat": "{{instance}} - TX"
+          }
+        ],
+        "yaxes": [
+          {"format": "Bps", "label": "Bytes/sec"},
+          {"format": "short", "show": false}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Disk I/O",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "instance:node_disk:read_bytes:rate5m",
+            "legendFormat": "{{instance}} - Read"
+          },
+          {
+            "expr": "instance:node_disk:write_bytes:rate5m",
+            "legendFormat": "{{instance}} - Write"
+          }
+        ],
+        "yaxes": [
+          {"format": "Bps", "label": "Bytes/sec"},
+          {"format": "short", "show": false}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Container Memory Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{container!=\"\"}",
+            "legendFormat": "{{container}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "bytes", "label": "Memory"},
+          {"format": "short", "show": false}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Container CPU Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{container!=\"\"}[5m]) * 100",
+            "legendFormat": "{{container}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "CPU %"},
+          {"format": "short", "show": false}
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 1
+  }
+}

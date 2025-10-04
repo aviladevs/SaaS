@@ -1,0 +1,38 @@
+# Kibana Configuration for Ávila DevOps SaaS
+# Log visualization and analysis
+
+# Server settings
+server.port: 5601
+server.host: "0.0.0.0"
+server.name: "aviladevops-saas-kibana"
+
+# Elasticsearch connection
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+elasticsearch.requestTimeout: 90000
+
+# Kibana settings
+kibana.index: ".kibana"
+kibana.defaultAppId: "discover"
+
+# Logging
+logging.dest: stdout
+logging.silent: false
+logging.quiet: false
+logging.verbose: false
+
+# Monitoring
+monitoring.enabled: true
+monitoring.kibana.collection.enabled: true
+
+# Security (disabled for internal network)
+xpack.security.enabled: false
+xpack.encryptedSavedObjects.encryptionKey: "aviladevops-saas-encryption-key-min-32-chars"
+
+# APM integration
+xpack.apm.ui.enabled: true
+
+# Reporting
+xpack.reporting.enabled: true
+
+# Default index pattern
+# This will be created automatically: logstash-*

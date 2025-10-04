@@ -1,0 +1,217 @@
+{
+  "dashboard": {
+    "title": "Performance Dashboard - Ávila DevOps SaaS",
+    "tags": ["saas", "performance", "technical"],
+    "timezone": "browser",
+    "editable": true,
+    "graphTooltip": 1,
+    "time": {
+      "from": "now-3h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Latency Distribution (P50, P95, P99)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "saas:http_request_duration:p50 * 1000",
+            "legendFormat": "{{service}} - P50"
+          },
+          {
+            "expr": "saas:http_request_duration:p95 * 1000",
+            "legendFormat": "{{service}} - P95"
+          },
+          {
+            "expr": "saas:http_request_duration:p99 * 1000",
+            "legendFormat": "{{service}} - P99"
+          }
+        ],
+        "yaxes": [
+          {"format": "ms", "label": "Latency", "logBase": 1},
+          {"format": "short", "show": false}
+        ],
+        "lines": true,
+        "fill": 0,
+        "linewidth": 2
+      },
+      {
+        "id": 2,
+        "title": "Apdex Score (Target: 300ms)",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "saas:apdex:score",
+            "legendFormat": "{{service}}"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none",
+            "min": 0,
+            "max": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.5, "color": "yellow"},
+                {"value": 0.85, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Throughput (req/s)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(django_http_requests_total_by_method_total[5m])) by (service)",
+            "legendFormat": "{{service}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short", "show": false}
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Database Query Performance (P95)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(pg_stat_statements_mean_exec_time_seconds_bucket[5m]))",
+            "legendFormat": "{{datname}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Query Time"},
+          {"format": "short", "show": false}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Database Transactions per Second",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "postgres:transactions:rate5m",
+            "legendFormat": "{{datname}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "TPS"},
+          {"format": "short", "show": false}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Redis Cache Hit Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "redis:keyspace_hit_rate * 100",
+            "legendFormat": "Hit Rate"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Hit Rate %", "min": 0, "max": 100},
+          {"format": "short", "show": false}
+        ],
+        "thresholds": [
+          {"value": 80, "colorMode": "critical", "op": "lt", "fill": true, "line": false}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Redis Operations per Second",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "redis:commands:rate1m",
+            "legendFormat": "Commands/sec"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Operations/sec"},
+          {"format": "short", "show": false}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Request Rate by Endpoint (Top 10)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32},
+        "targets": [
+          {
+            "expr": "topk(10, sum(rate(django_http_requests_total_by_view_transport_method_total[5m])) by (view))",
+            "legendFormat": "{{view}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short", "show": false}
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Slowest Endpoints (P99 > 1s)",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(django_http_request_duration_seconds_bucket[5m])) by (le, view)) > 1",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "sortBy": [{"displayName": "Value", "desc": true}]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Celery Task Execution Time",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 40},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(celery_task_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{task}} - P95"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"},
+          {"format": "short", "show": false}
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 1
+  }
+}

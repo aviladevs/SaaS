@@ -1,0 +1,358 @@
+# Prometheus Alert Rules for Ávila DevOps SaaS
+# Critical and warning alerts for SLA monitoring
+
+groups:
+  # ============================================================================
+  # HIGH AVAILABILITY & UPTIME ALERTS
+  # ============================================================================
+  - name: uptime_alerts
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute."
+          runbook_url: "https://docs.aviladevops.com.br/runbooks/service-down"
+
+      - alert: ServiceFlapping
+        expr: changes(up[10m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: stability
+        annotations:
+          summary: "Service {{ $labels.job }} is flapping"
+          description: "{{ $labels.job }} on {{ $labels.instance }} has restarted {{ $value }} times in the last 10 minutes."
+
+  # ============================================================================
+  # ERROR RATE ALERTS (SLA: < 0.1%)
+  # ============================================================================
+  - name: error_rate_alerts
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(django_http_responses_total_by_status_total{status=~"5.."}[5m])) by (service)
+            /
+            sum(rate(django_http_responses_total_by_status_total[5m])) by (service)
+          ) > 0.001
+        for: 5m
+        labels:
+          severity: critical
+          category: errors
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "{{ $labels.service }} has error rate of {{ $value | humanizePercentage }} (threshold: 0.1%)"
+          runbook_url: "https://docs.aviladevops.com.br/runbooks/high-error-rate"
+
+      - alert: ElevatedErrorRate
+        expr: |
+          (
+            sum(rate(django_http_responses_total_by_status_total{status=~"5.."}[5m])) by (service)
+            /
+            sum(rate(django_http_responses_total_by_status_total[5m])) by (service)
+          ) > 0.0005
+        for: 10m
+        labels:
+          severity: warning
+          category: errors
+        annotations:
+          summary: "Elevated error rate on {{ $labels.service }}"
+          description: "{{ $labels.service }} has error rate of {{ $value | humanizePercentage }}"
+
+      - alert: CriticalErrorSpike
+        expr: |
+          (
+            rate(django_http_responses_total_by_status_total{status=~"5.."}[1m])
+            /
+            rate(django_http_responses_total_by_status_total{status=~"5.."}[1m] offset 5m)
+          ) > 5
+        for: 2m
+        labels:
+          severity: critical
+          category: errors
+        annotations:
+          summary: "Critical error spike on {{ $labels.service }}"
+          description: "{{ $labels.service }} error rate increased by {{ $value }}x in the last minute"
+
+  # ============================================================================
+  # RESPONSE TIME ALERTS (SLA: < 300ms at 95th percentile)
+  # ============================================================================
+  - name: latency_alerts
+    interval: 30s
+    rules:
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(django_http_request_duration_seconds_bucket[5m])) by (le, service)
+          ) > 0.3
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High response time on {{ $labels.service }}"
+          description: "{{ $labels.service }} 95th percentile response time is {{ $value }}s (threshold: 300ms)"
+          runbook_url: "https://docs.aviladevops.com.br/runbooks/high-latency"
+
+      - alert: CriticalResponseTime
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(django_http_request_duration_seconds_bucket[5m])) by (le, service)
+          ) > 1.0
+        for: 3m
+        labels:
+          severity: critical
+          category: performance
+        annotations:
+          summary: "Critical response time on {{ $labels.service }}"
+          description: "{{ $labels.service }} 95th percentile response time is {{ $value }}s"
+
+      - alert: ResponseTimeP99High
+        expr: |
+          histogram_quantile(0.99, 
+            sum(rate(django_http_request_duration_seconds_bucket[5m])) by (le, service)
+          ) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "P99 response time high on {{ $labels.service }}"
+          description: "{{ $labels.service }} 99th percentile response time is {{ $value }}s"
+
+  # ============================================================================
+  # INFRASTRUCTURE ALERTS
+  # ============================================================================
+  - name: infrastructure_alerts
+    interval: 30s
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: CriticalCPUUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 5m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Critical CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: CriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 5m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Critical memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs"} / node_filesystem_size_bytes) * 100 < 15
+        for: 10m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Disk space is {{ $value }}% available on {{ $labels.mountpoint }}"
+
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs"} / node_filesystem_size_bytes) * 100 < 5
+        for: 5m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Critical disk space on {{ $labels.instance }}"
+          description: "Disk space is {{ $value }}% available on {{ $labels.mountpoint }}"
+
+  # ============================================================================
+  # DATABASE ALERTS
+  # ============================================================================
+  - name: database_alerts
+    interval: 30s
+    rules:
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database on {{ $labels.instance }} is down"
+
+      - alert: PostgreSQLTooManyConnections
+        expr: sum by (instance) (pg_stat_activity_count) > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "Too many PostgreSQL connections"
+          description: "PostgreSQL has {{ $value }} active connections on {{ $labels.instance }}"
+
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_activity_max_tx_duration[5m]) > 60
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "Slow PostgreSQL queries detected"
+          description: "Slow queries detected on {{ $labels.instance }}"
+
+      - alert: PostgreSQLDeadLocks
+        expr: increase(pg_stat_database_deadlocks[1m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "PostgreSQL deadlocks detected"
+          description: "{{ $value }} deadlocks detected on {{ $labels.instance }}"
+
+  # ============================================================================
+  # REDIS ALERTS
+  # ============================================================================
+  - name: redis_alerts
+    interval: 30s
+    rules:
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Redis on {{ $labels.instance }} is down"
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+      - alert: RedisTooManyConnections
+        expr: redis_connected_clients > 1000
+        for: 5m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "Too many Redis connections"
+          description: "Redis has {{ $value }} connections on {{ $labels.instance }}"
+
+  # ============================================================================
+  # BUSINESS METRICS ALERTS
+  # ============================================================================
+  - name: business_alerts
+    interval: 1m
+    rules:
+      - alert: LowUserRegistrations
+        expr: increase(saas_user_registrations_total[1h]) < 5
+        for: 2h
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "Low user registration rate"
+          description: "Only {{ $value }} users registered in the last hour"
+
+      - alert: HighChurnRate
+        expr: |
+          (
+            increase(saas_user_cancellations_total[24h])
+            /
+            saas_active_users_total
+          ) > 0.05
+        for: 1h
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "High churn rate detected"
+          description: "Churn rate is {{ $value | humanizePercentage }} in the last 24 hours"
+
+      - alert: PaymentFailureRateHigh
+        expr: |
+          (
+            increase(saas_payment_failures_total[1h])
+            /
+            increase(saas_payment_attempts_total[1h])
+          ) > 0.1
+        for: 30m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "High payment failure rate"
+          description: "Payment failure rate is {{ $value | humanizePercentage }}"
+
+  # ============================================================================
+  # ELASTICSEARCH ALERTS
+  # ============================================================================
+  - name: elasticsearch_alerts
+    interval: 30s
+    rules:
+      - alert: ElasticsearchClusterRed
+        expr: elasticsearch_cluster_health_status{color="red"} == 1
+        for: 5m
+        labels:
+          severity: critical
+          category: search
+        annotations:
+          summary: "Elasticsearch cluster status is RED"
+          description: "Elasticsearch cluster {{ $labels.cluster }} is in RED state"
+
+      - alert: ElasticsearchClusterYellow
+        expr: elasticsearch_cluster_health_status{color="yellow"} == 1
+        for: 10m
+        labels:
+          severity: warning
+          category: search
+        annotations:
+          summary: "Elasticsearch cluster status is YELLOW"
+          description: "Elasticsearch cluster {{ $labels.cluster }} is in YELLOW state"
+
+      - alert: ElasticsearchHighHeapUsage
+        expr: elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"} > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          category: search
+        annotations:
+          summary: "Elasticsearch high heap usage"
+          description: "Elasticsearch heap usage is {{ $value | humanizePercentage }}"

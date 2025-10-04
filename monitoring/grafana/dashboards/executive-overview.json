@@ -1,0 +1,339 @@
+{
+  "dashboard": {
+    "title": "Executive Overview - Ávila DevOps SaaS",
+    "tags": ["saas", "executive", "overview"],
+    "timezone": "browser",
+    "editable": true,
+    "graphTooltip": 1,
+    "time": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health Status",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "avg(up{job=~\".*-page|.*-system|main-app\"})",
+            "legendFormat": "Overall Health"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.95, "color": "yellow"},
+                {"value": 0.99, "color": "green"}
+              ]
+            },
+            "mappings": []
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Users (Now)",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "sum(saas:users:active_total)"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "blue"},
+                {"value": 100, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Revenue (This Month)",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "sum(saas:revenue:total)"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyBRL",
+            "color": {"mode": "palette-classic"}
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Success Rate (24h)",
+        "type": "gauge",
+        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "avg(saas:requests:success_rate)"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 95, "color": "yellow"},
+                {"value": 99, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Service Availability (7 days)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "targets": [
+          {
+            "expr": "saas:uptime:percentage_24h",
+            "legendFormat": "{{job}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Uptime %", "min": 95, "max": 100},
+          {"format": "short", "show": false}
+        ],
+        "lines": true,
+        "fill": 1,
+        "thresholds": [
+          {"value": 99.9, "colorMode": "custom", "op": "lt", "fill": true, "line": true, "fillColor": "rgba(255, 0, 0, 0.2)", "lineColor": "red"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Error Rate Trend (7 days)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "targets": [
+          {
+            "expr": "sum(saas:http_errors:rate5m) by (service)",
+            "legendFormat": "{{service}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Errors/sec"},
+          {"format": "short", "show": false}
+        ],
+        "lines": true,
+        "fill": 1
+      },
+      {
+        "id": 7,
+        "title": "User Growth (30 days)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+        "targets": [
+          {
+            "expr": "saas:users:active_total",
+            "legendFormat": "Active Users"
+          },
+          {
+            "expr": "increase(saas_user_registrations_total[1d])",
+            "legendFormat": "Daily Registrations"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Users"},
+          {"format": "short", "show": false}
+        ],
+        "lines": true,
+        "fill": 2
+      },
+      {
+        "id": 8,
+        "title": "Revenue Trend (30 days)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+        "targets": [
+          {
+            "expr": "sum(saas:revenue:mrr)",
+            "legendFormat": "MRR"
+          }
+        ],
+        "yaxes": [
+          {"format": "currencyBRL", "label": "Revenue"},
+          {"format": "short", "show": false}
+        ],
+        "lines": true,
+        "fill": 2
+      },
+      {
+        "id": 9,
+        "title": "Active Alerts",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 22},
+        "targets": [
+          {
+            "expr": "ALERTS{alertstate=\"firing\"}",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "sortBy": [{"displayName": "severity", "desc": true}]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "severity"},
+              "properties": [
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    {"type": "value", "value": "critical", "text": "CRITICAL", "color": "red"},
+                    {"type": "value", "value": "warning", "text": "WARNING", "color": "yellow"}
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 10,
+        "title": "Performance Summary",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 22},
+        "targets": [
+          {
+            "expr": "avg(saas:http_request_duration:p95) * 1000",
+            "legendFormat": "Avg P95 Latency"
+          },
+          {
+            "expr": "sum(rate(django_http_requests_total_by_method_total[5m]))",
+            "legendFormat": "Total Throughput"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "orientation": "horizontal"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Avg P95 Latency"},
+              "properties": [
+                {"id": "unit", "value": "ms"},
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {"value": 0, "color": "green"},
+                      {"value": 300, "color": "yellow"},
+                      {"value": 1000, "color": "red"}
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Total Throughput"},
+              "properties": [
+                {"id": "unit", "value": "reqps"}
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 11,
+        "title": "Top Services by Traffic",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 30},
+        "targets": [
+          {
+            "expr": "sum(rate(django_http_requests_total_by_method_total[1h])) by (service)",
+            "legendFormat": "{{service}}"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]},
+          "pieType": "donut"
+        }
+      },
+      {
+        "id": 12,
+        "title": "Infrastructure Cost Indicators",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 30},
+        "targets": [
+          {
+            "expr": "sum(container_memory_usage_bytes) / 1024 / 1024 / 1024",
+            "legendFormat": "Total Memory (GB)"
+          },
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total[5m]))",
+            "legendFormat": "Total CPU Cores"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Resources"},
+          {"format": "short", "show": false}
+        ],
+        "lines": true,
+        "fill": 1
+      }
+    ],
+    "refresh": "1m",
+    "schemaVersion": 27,
+    "version": 1
+  }
+}
