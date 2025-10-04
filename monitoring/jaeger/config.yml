@@ -1,0 +1,54 @@
+# Jaeger Configuration for Ávila DevOps SaaS
+# Distributed tracing configuration
+
+# Storage backend
+storage:
+  type: elasticsearch
+  options:
+    es:
+      server-urls: http://elasticsearch:9200
+      index-prefix: jaeger
+      create-index-templates: true
+      tags-as-fields:
+        all: true
+        include: service,operation,error
+      num-shards: 5
+      num-replicas: 1
+
+# Collector
+collector:
+  zipkin:
+    host-port: 9411
+  otlp:
+    enabled: true
+    grpc:
+      host-port: 4317
+    http:
+      host-port: 4318
+
+# Query service
+query:
+  base-path: /
+  max-traces: 1000
+  ui-config: /etc/jaeger/ui-config.json
+
+# Agent
+agent:
+  zipkin:
+    compact:
+      enabled: true
+      host-port: 5775
+    thrift:
+      enabled: true
+      host-port: 6831
+
+# Sampling
+sampling:
+  default_strategy:
+    type: probabilistic
+    param: 0.1  # Sample 10% of traces
+  max_operations: 1000
+
+# Metrics
+metrics-backend: prometheus
+metrics-http-route: /metrics

@@ -1,0 +1,274 @@
+# Prometheus Recording Rules for Ávila DevOps SaaS
+# Pre-computed metrics for efficient querying and dashboards
+
+groups:
+  # ============================================================================
+  # APPLICATION METRICS RECORDING RULES
+  # ============================================================================
+  - name: application_metrics
+    interval: 30s
+    rules:
+      # Request rate per service
+      - record: saas:http_requests:rate5m
+        expr: |
+          sum(rate(django_http_requests_total_by_method_total[5m])) by (service)
+
+      - record: saas:http_requests:rate1h
+        expr: |
+          sum(rate(django_http_requests_total_by_method_total[1h])) by (service)
+
+      # Error rate per service
+      - record: saas:http_errors:rate5m
+        expr: |
+          sum(rate(django_http_responses_total_by_status_total{status=~"5.."}[5m])) by (service)
+
+      # Error rate percentage
+      - record: saas:http_error_rate:percentage
+        expr: |
+          (
+            sum(rate(django_http_responses_total_by_status_total{status=~"5.."}[5m])) by (service)
+            /
+            sum(rate(django_http_responses_total_by_status_total[5m])) by (service)
+          ) * 100
+
+      # Response time percentiles
+      - record: saas:http_request_duration:p50
+        expr: |
+          histogram_quantile(0.50, 
+            sum(rate(django_http_request_duration_seconds_bucket[5m])) by (le, service)
+          )
+
+      - record: saas:http_request_duration:p90
+        expr: |
+          histogram_quantile(0.90, 
+            sum(rate(django_http_request_duration_seconds_bucket[5m])) by (le, service)
+          )
+
+      - record: saas:http_request_duration:p95
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(django_http_request_duration_seconds_bucket[5m])) by (le, service)
+          )
+
+      - record: saas:http_request_duration:p99
+        expr: |
+          histogram_quantile(0.99, 
+            sum(rate(django_http_request_duration_seconds_bucket[5m])) by (le, service)
+          )
+
+      # Average response time
+      - record: saas:http_request_duration:avg
+        expr: |
+          sum(rate(django_http_request_duration_seconds_sum[5m])) by (service)
+          /
+          sum(rate(django_http_request_duration_seconds_count[5m])) by (service)
+
+  # ============================================================================
+  # INFRASTRUCTURE METRICS RECORDING RULES
+  # ============================================================================
+  - name: infrastructure_metrics
+    interval: 30s
+    rules:
+      # CPU usage percentage
+      - record: instance:node_cpu:usage_percent
+        expr: |
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+      # Memory usage percentage
+      - record: instance:node_memory:usage_percent
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+
+      # Disk usage percentage
+      - record: instance:node_disk:usage_percent
+        expr: |
+          (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs"} / 
+          node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs"})) * 100
+
+      # Network throughput
+      - record: instance:node_network:receive_bytes:rate5m
+        expr: |
+          sum(rate(node_network_receive_bytes_total[5m])) by (instance)
+
+      - record: instance:node_network:transmit_bytes:rate5m
+        expr: |
+          sum(rate(node_network_transmit_bytes_total[5m])) by (instance)
+
+      # Disk I/O
+      - record: instance:node_disk:read_bytes:rate5m
+        expr: |
+          sum(rate(node_disk_read_bytes_total[5m])) by (instance)
+
+      - record: instance:node_disk:write_bytes:rate5m
+        expr: |
+          sum(rate(node_disk_written_bytes_total[5m])) by (instance)
+
+  # ============================================================================
+  # DATABASE METRICS RECORDING RULES
+  # ============================================================================
+  - name: database_metrics
+    interval: 30s
+    rules:
+      # PostgreSQL connection usage
+      - record: postgres:connections:usage_percent
+        expr: |
+          (pg_stat_activity_count / pg_settings_max_connections) * 100
+
+      # Database size
+      - record: postgres:database:size_bytes
+        expr: |
+          sum(pg_database_size_bytes) by (datname)
+
+      # Query rate
+      - record: postgres:queries:rate5m
+        expr: |
+          rate(pg_stat_database_xact_commit[5m]) + rate(pg_stat_database_xact_rollback[5m])
+
+      # Transaction rate
+      - record: postgres:transactions:rate5m
+        expr: |
+          rate(pg_stat_database_xact_commit[5m])
+
+      # Cache hit ratio
+      - record: postgres:cache_hit_ratio
+        expr: |
+          sum(pg_stat_database_blks_hit) by (datname) / 
+          (sum(pg_stat_database_blks_hit) by (datname) + sum(pg_stat_database_blks_read) by (datname))
+
+  # ============================================================================
+  # REDIS METRICS RECORDING RULES
+  # ============================================================================
+  - name: redis_metrics
+    interval: 30s
+    rules:
+      # Memory usage percentage
+      - record: redis:memory:usage_percent
+        expr: |
+          (redis_memory_used_bytes / redis_memory_max_bytes) * 100
+
+      # Commands per second
+      - record: redis:commands:rate1m
+        expr: |
+          rate(redis_commands_processed_total[1m])
+
+      # Hit rate
+      - record: redis:keyspace_hit_rate
+        expr: |
+          rate(redis_keyspace_hits_total[5m]) / 
+          (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))
+
+      # Evicted keys rate
+      - record: redis:evicted_keys:rate5m
+        expr: |
+          rate(redis_evicted_keys_total[5m])
+
+  # ============================================================================
+  # BUSINESS METRICS RECORDING RULES
+  # ============================================================================
+  - name: business_metrics
+    interval: 1m
+    rules:
+      # Active users
+      - record: saas:users:active_total
+        expr: |
+          saas_active_users_total
+
+      # User registrations rate
+      - record: saas:users:registrations:rate1h
+        expr: |
+          increase(saas_user_registrations_total[1h])
+
+      - record: saas:users:registrations:rate24h
+        expr: |
+          increase(saas_user_registrations_total[24h])
+
+      # Login rate
+      - record: saas:users:logins:rate1h
+        expr: |
+          increase(saas_user_logins_total[1h])
+
+      # Revenue metrics
+      - record: saas:revenue:total
+        expr: |
+          sum(saas_revenue_total) by (tenant)
+
+      - record: saas:revenue:mrr
+        expr: |
+          sum(saas_subscription_revenue_monthly) by (tenant)
+
+      # Conversion rate
+      - record: saas:conversion:rate
+        expr: |
+          (
+            sum(increase(saas_conversions_total[24h])) by (tenant)
+            /
+            sum(increase(saas_visits_total[24h])) by (tenant)
+          ) * 100
+
+      # Churn rate
+      - record: saas:users:churn_rate
+        expr: |
+          (
+            increase(saas_user_cancellations_total[30d])
+            /
+            saas_active_users_total
+          ) * 100
+
+  # ============================================================================
+  # AVAILABILITY METRICS (SLA)
+  # ============================================================================
+  - name: sla_metrics
+    interval: 1m
+    rules:
+      # Uptime percentage (5m window)
+      - record: saas:uptime:percentage_5m
+        expr: |
+          avg_over_time(up[5m]) * 100
+
+      # Uptime percentage (1h window)
+      - record: saas:uptime:percentage_1h
+        expr: |
+          avg_over_time(up[1h]) * 100
+
+      # Uptime percentage (24h window)
+      - record: saas:uptime:percentage_24h
+        expr: |
+          avg_over_time(up[24h]) * 100
+
+      # Request success rate
+      - record: saas:requests:success_rate
+        expr: |
+          (
+            sum(rate(django_http_responses_total_by_status_total{status!~"5.."}[5m])) by (service)
+            /
+            sum(rate(django_http_responses_total_by_status_total[5m])) by (service)
+          ) * 100
+
+      # Apdex score (T=300ms)
+      - record: saas:apdex:score
+        expr: |
+          (
+            sum(rate(django_http_request_duration_seconds_bucket{le="0.3"}[5m])) by (service) +
+            sum(rate(django_http_request_duration_seconds_bucket{le="1.2"}[5m])) by (service) / 2
+          ) / sum(rate(django_http_request_duration_seconds_count[5m])) by (service)
+
+  # ============================================================================
+  # ALERT SUMMARY METRICS
+  # ============================================================================
+  - name: alert_summary
+    interval: 1m
+    rules:
+      # Total alerts firing
+      - record: saas:alerts:firing_total
+        expr: |
+          count(ALERTS{alertstate="firing"})
+
+      # Critical alerts firing
+      - record: saas:alerts:critical_firing_total
+        expr: |
+          count(ALERTS{alertstate="firing", severity="critical"})
+
+      # Warning alerts firing
+      - record: saas:alerts:warning_firing_total
+        expr: |
+          count(ALERTS{alertstate="firing", severity="warning"})
