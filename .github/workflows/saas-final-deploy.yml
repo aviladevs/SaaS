@@ -57,7 +57,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Set up Python
       if: matrix.service.framework == 'django'
@@ -138,7 +138,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
@@ -238,7 +238,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
@@ -262,7 +262,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
@@ -288,7 +288,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Wait for services to be ready
       run: |
@@ -329,7 +329,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
@@ -354,7 +354,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Create Release
       uses: actions/create-release@v1
