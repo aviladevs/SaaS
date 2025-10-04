@@ -1,2 +1,2 @@
-mysqlclient==2.2.0
+mysqlclient==2.2.7
 cloud-sql-python-connector==1.6.0
