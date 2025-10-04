@@ -1,0 +1,16 @@
+runtime: python39
+service: landing-page
+
+handlers:
+- url: /
+  static_files: Index.html
+  upload: Index.html
+
+- url: /(.*)
+  static_files: \1
+  upload: .*
+
+automatic_scaling:
+  min_instances: 1
+  max_instances: 5
+  target_cpu_utilization: 0.6

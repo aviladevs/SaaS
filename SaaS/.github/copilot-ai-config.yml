@@ -1,0 +1,90 @@
+# 🤖 GitHub Copilot Auto-Approval Configuration
+# Machine Learning-style settings for automated PR approval
+
+# AI Confidence Thresholds
+AI_APPROVAL_THRESHOLD_HIGH: 150    # Auto-approve + auto-merge
+AI_APPROVAL_THRESHOLD_MEDIUM: 120  # Auto-approve only
+AI_MANUAL_REVIEW_THRESHOLD: 80     # Below this = manual review required
+
+# Scoring Weights (total = 200 points)
+QUALITY_SCORE_MAX: 100
+TEST_SCORE_MAX: 50
+SECURITY_SCORE_MAX: 50
+
+# Quality Scoring Criteria
+COPILOT_AUTHOR_POINTS: 30          # Author is GitHub Copilot
+BRANCH_PATTERN_POINTS: 10          # Branch follows copilot/ pattern
+TITLE_QUALITY_POINTS: 20           # Good PR title
+INFRASTRUCTURE_POINTS: 15          # Infrastructure improvements
+DOCUMENTATION_POINTS: 10           # Documentation included
+CONFIG_FILES_POINTS: 15            # Configuration files
+
+# Security Penalties
+DANGEROUS_FILE_PENALTY: -20        # Per dangerous file (secrets, keys, etc.)
+HARDCODED_SECRETS_PENALTY: -30     # Hardcoded credentials found
+
+# Auto-Merge Settings
+AUTO_MERGE_ENABLED: true           # Enable auto-merge for high confidence
+AUTO_MERGE_MIN_CONFIDENCE: "HIGH"  # Minimum confidence level for auto-merge
+AUTO_MERGE_DELAY: 30               # Seconds to wait before auto-merge
+
+# File Pattern Classifications
+INFRASTRUCTURE_PATTERNS:
+  - "infrastructure/"
+  - "kubernetes/"
+  - "docker/"
+  - "nginx/"
+  - "terraform/"
+
+DOCUMENTATION_PATTERNS:
+  - "*.md"
+  - "README*"
+  - "docs/"
+  - "*.txt"
+
+CONFIG_PATTERNS:
+  - "*.yml"
+  - "*.yaml"
+  - "*.json"
+  - "*.conf"
+  - "*.config"
+
+DANGEROUS_PATTERNS:
+  - "*.env"
+  - "*secret*"
+  - "*password*"
+  - "*key*"
+  - "*token*"
+  - "credentials/"
+
+# Learning System Settings
+ENABLE_AI_LEARNING: true           # Collect data for model improvement
+LEARNING_DATA_RETENTION: 90        # Days to keep learning data
+
+# Notification Settings
+NOTIFY_ON_AUTO_APPROVE: true       # Comment on auto-approved PRs
+NOTIFY_ON_MANUAL_REVIEW: true      # Comment when manual review needed
+MENTION_REVIEWERS: ["aviladevs"]   # Users to mention for manual review
+
+# Advanced AI Features
+ENABLE_CODE_ANALYSIS: true         # Deep code quality analysis
+ENABLE_DEPENDENCY_CHECK: true      # Check for dependency updates
+ENABLE_SECURITY_SCAN: true         # Security vulnerability scanning
+ENABLE_PERFORMANCE_ANALYSIS: false # Performance impact analysis (experimental)
+
+# Bypass Rules (always require manual review)
+ALWAYS_MANUAL_REVIEW_PATHS:
+  - "*.env*"
+  - "secrets/"
+  - "credentials/"
+  - "deploy*.sh"
+  - "terraform/"
+
+# Trusted Patterns (always auto-approve if from Copilot)
+TRUSTED_PATTERNS:
+  - "docs/*.md"
+  - "README*.md"
+  - "*.yml"
+  - "*.yaml"
+  - "scripts/*.sh"
+  - "scripts/*.ps1"

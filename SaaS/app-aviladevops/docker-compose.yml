@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - ./staticfiles:/app/staticfiles
+      - ./media:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-dev-key-change-in-production
+      - DB_ENGINE=django.db.backends.sqlite3
+      - DB_NAME=/app/db.sqlite3
+      - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+    depends_on:
+      - db
+      - redis
+    networks:
+      - aviladevops-network
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=aviladevops
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - aviladevops-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - aviladevops-network
+
+  celery:
+    build: .
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-dev-key-change-in-production
+      - DB_ENGINE=django.db.backends.sqlite3
+      - DB_NAME=/app/db.sqlite3
+    depends_on:
+      - db
+      - redis
+      - web
+    networks:
+      - aviladevops-network
+
+  celery-beat:
+    build: .
+    command: celery -A core beat --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-dev-key-change-in-production
+      - DB_ENGINE=django.db.backends.sqlite3
+      - DB_NAME=/app/db.sqlite3
+    depends_on:
+      - db
+      - redis
+      - web
+    networks:
+      - aviladevops-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./staticfiles:/app/staticfiles
+      - ./media:/app/media
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - web
+    networks:
+      - aviladevops-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  aviladevops-network:
+    driver: bridge

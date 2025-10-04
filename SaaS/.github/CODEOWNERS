@@ -1,0 +1,46 @@
+# Code Owners - SaaS Ávila DevOps
+# Este arquivo define quem deve revisar mudanças em partes específicas do código
+
+# Global owners - requerido para qualquer mudança
+* @aviladevs
+
+# Infrastructure and DevOps
+/.github/ @aviladevs
+/infrastructure/ @aviladevs
+/scripts/ @aviladevs
+/docker-compose*.yml @aviladevs
+/Dockerfile* @aviladevs
+/kubernetes/ @aviladevs
+/terraform/ @aviladevs
+
+# Backend Services (Django)
+/apps/landing-page/ @aviladevs
+/apps/main-app/ @aviladevs
+/apps/fiscal-analytics/ @aviladevs
+/apps/recycling-system/ @aviladevs
+
+# Frontend Services
+/apps/clinic-management/ @aviladevs
+/apps/mobile/ @aviladevs
+
+# Shared utilities and configurations
+/shared/ @aviladevs
+/templates/ @aviladevs
+
+# Documentation
+/docs/ @aviladevs
+*.md @aviladevs
+README.md @aviladevs
+
+# Configuration files
+.env* @aviladevs
+requirements.txt @aviladevs
+package.json @aviladevs
+tsconfig.json @aviladevs
+
+# Database migrations (require careful review)
+**/migrations/ @aviladevs
+
+# Security-sensitive files
+**/settings/ @aviladevs
+**/config/ @aviladevs

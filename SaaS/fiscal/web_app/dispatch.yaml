@@ -1,0 +1,7 @@
+dispatch:
+  # Route the fiscal subdomain to the App Engine service 'default'
+  - url: "fiscal.aviladevops.com.br/*"
+    service: default
+  # Optional: support www subdomain if you plan to use it
+  - url: "www.fiscal.aviladevops.com.br/*"
+    service: default

@@ -1,0 +1,43 @@
+INFO 2025-10-04 14:51:53,212 autoreload 24304 18568 Watching for file changes with StatReloader
+INFO 2025-10-04 14:52:09,897 basehttp 24304 30464 "GET /admin?id=a8216296-85ab-4617-8cca-ed862a05618c&vscodeBrowserReqId=1759600329583 HTTP/1.1" 301 0
+INFO 2025-10-04 14:52:10,203 basehttp 24304 25148 code 400, message Bad request version ('localhost\x00')
+ERROR 2025-10-04 14:52:10,203 basehttp 24304 25148 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-10-04 14:52:10,465 basehttp 24304 21792 code 400, message Bad request version ('Db\x8a²r\x03!sòxô\x84½')
+ERROR 2025-10-04 14:52:10,465 basehttp 24304 21792 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-10-04 14:52:10,512 basehttp 24304 20524 code 400, message Bad request version ('ù\x80\x99')
+ERROR 2025-10-04 14:52:10,512 basehttp 24304 20524 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-10-04 14:52:10,772 basehttp 24304 30180 code 400, message Bad request version ('úú\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06¥jj\x00\x00\x00')
+ERROR 2025-10-04 14:52:10,772 basehttp 24304 30180 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-10-04 14:52:45,109 basehttp 24304 22864 "GET /admin HTTP/1.1" 301 0
+INFO 2025-10-04 14:52:45,416 basehttp 24304 12788 code 400, message Bad request version ('úqíújr\x12ÂëÓº\x9a\x92')
+ERROR 2025-10-04 14:52:45,417 basehttp 24304 12788 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-10-04 14:52:45,683 basehttp 24304 26336 code 400, message Bad request version ('íÙ$\x8dñ')
+ERROR 2025-10-04 14:52:45,683 basehttp 24304 26336 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-10-04 14:52:45,725 basehttp 24304 7276 code 400, message Bad request version ('³A,a¬\x8bu¯')
+ERROR 2025-10-04 14:52:45,726 basehttp 24304 7276 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-10-04 14:52:46,002 basehttp 24304 11600 code 400, message Bad request version ('localhost\x00\x1b\x00\x03\x02\x00\x02\x00+\x00\x07\x06::\x03\x04\x03\x03\x00')
+ERROR 2025-10-04 14:52:46,002 basehttp 24304 11600 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-10-04 14:53:56,696 autoreload 24304 18568 D:\Dev Driver\SaaS\SaaS\app-aviladevops\core\settings.py changed, reloading.
+INFO 2025-10-04 14:53:58,360 autoreload 11444 10296 Watching for file changes with StatReloader
+INFO 2025-10-04 14:54:02,060 autoreload 11444 10296 D:\Dev Driver\SaaS\SaaS\app-aviladevops\core\settings.py changed, reloading.
+INFO 2025-10-04 14:54:03,332 autoreload 20736 20936 Watching for file changes with StatReloader
+INFO 2025-10-04 14:54:46,340 autoreload 17612 24240 Watching for file changes with StatReloader
+ERROR 2025-10-04 14:55:02,181 basehttp 17612 14672 "GET / HTTP/1.1" 500 145
+WARNING 2025-10-04 14:55:02,236 basehttp 17612 14672 "GET /favicon.ico HTTP/1.1" 404 179
+INFO 2025-10-04 14:55:06,101 basehttp 17612 9440 "GET /admin/?id=a8216296-85ab-4617-8cca-ed862a05618c&vscodeBrowserReqId=1759600506080 HTTP/1.1" 302 0
+INFO 2025-10-04 14:55:06,383 basehttp 17612 9440 "GET /admin/login/?next=/admin/%3Fid%3Da8216296-85ab-4617-8cca-ed862a05618c%26vscodeBrowserReqId%3D1759600506080 HTTP/1.1" 200 4367
+ERROR 2025-10-04 14:55:22,854 basehttp 17612 18152 "GET / HTTP/1.1" 500 145
+WARNING 2025-10-04 14:55:22,914 basehttp 17612 18152 "GET /favicon.ico HTTP/1.1" 404 179
+WARNING 2025-10-04 14:55:31,051 basehttp 17612 27588 "GET /api/ HTTP/1.1" 401 68
+WARNING 2025-10-04 14:55:31,110 basehttp 17612 16516 "GET /favicon.ico HTTP/1.1" 404 179
+INFO 2025-10-04 14:55:51,476 basehttp 17612 15620 "GET /admin/ HTTP/1.1" 302 0
+INFO 2025-10-04 14:55:51,490 basehttp 17612 15620 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4209
+INFO 2025-10-04 14:55:51,554 basehttp 17612 15620 "GET /static/admin/css/base.css HTTP/1.1" 200 22120
+INFO 2025-10-04 14:55:51,557 basehttp 17612 20736 "GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2808
+INFO 2025-10-04 14:55:51,562 basehttp 17612 912 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2810
+INFO 2025-10-04 14:55:51,564 basehttp 17612 7332 "GET /static/admin/css/login.css HTTP/1.1" 200 951
+INFO 2025-10-04 14:55:51,565 basehttp 17612 14896 "GET /static/admin/js/theme.js HTTP/1.1" 200 1653
+INFO 2025-10-04 14:55:51,569 basehttp 17612 21548 "GET /static/admin/css/responsive.css HTTP/1.1" 200 16565
+INFO 2025-10-04 14:55:51,579 basehttp 17612 21548 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+WARNING 2025-10-04 14:55:51,655 basehttp 17612 21548 "GET /favicon.ico HTTP/1.1" 404 179
+INFO 2025-10-04 14:56:05,987 basehttp 17612 28708 "POST /admin/login/?next=/admin/ HTTP/1.1" 200 4403

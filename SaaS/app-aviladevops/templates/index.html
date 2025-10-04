@@ -1,0 +1,682 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero" id="home">
+    <div class="hero-background">
+        <div class="hero-particles"></div>
+        <div class="hero-gradient"></div>
+    </div>
+
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="hero-text" data-aos="fade-right" data-aos-duration="1000">
+                <h1 class="hero-title">
+                    <span class="hero-title-main">Transformamos Ideias em</span>
+                    <span class="hero-title-highlight">Soluções Tecnológicas</span>
+                </h1>
+                <p class="hero-description">
+                    Somos especialistas em desenvolvimento web, DevOps e transformação digital.
+                    Criamos soluções inovadoras que impulsionam o crescimento do seu negócio.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">Projetos Entregues</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">10+</span>
+                        <span class="stat-label">Anos de Experiência</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Clientes Satisfeitos</span>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <a href="#contact" class="btn btn-primary btn-large">
+                        <i class="fas fa-rocket"></i>
+                        Comece Seu Projeto
+                    </a>
+                    <a href="{% url 'core:portfolio' %}" class="btn btn-outline btn-large">
+                        <i class="fas fa-eye"></i>
+                        Ver Portfólio
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-visual" data-aos="fade-left" data-aos-duration="1000">
+                <div class="hero-code-window">
+                    <div class="code-header">
+                        <div class="code-controls">
+                            <span class="control red"></span>
+                            <span class="control yellow"></span>
+                            <span class="control green"></span>
+                        </div>
+                        <div class="code-title">main.py</div>
+                    </div>
+                    <div class="code-content">
+                        <div class="code-line">
+                            <span class="keyword">from</span> aviladevops <span class="keyword">import</span> Innovation
+                        </div>
+                        <div class="code-line">
+                            <span class="keyword">class</span> <span class="class">Project</span>:
+                        </div>
+                        <div class="code-line indent">
+                            <span class="keyword">def</span> <span class="function">__init__</span>(self, vision, technology):
+                        </div>
+                        <div class="code-line indent-2">
+                            <span class="variable">self.vision</span> = vision
+                        </div>
+                        <div class="code-line indent-2">
+                            <span class="variable">self.technology</span> = technology
+                        </div>
+                        <div class="code-line">
+                            <span class="keyword">def</span> <span class="function">transform</span>(self):
+                        </div>
+                        <div class="code-line indent">
+                            <span class="keyword">return</span> Innovation.<span class="function">create</span>(self.vision, self.technology)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-scroll">
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="services" id="services">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title">Nossos Serviços</h2>
+            <p class="section-subtitle">
+                Oferecemos soluções completas em tecnologia para empresas de todos os portes
+            </p>
+        </div>
+
+        <div class="services-grid">
+            <div class="service-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="service-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3 class="service-title">Desenvolvimento Web</h3>
+                <p class="service-description">
+                    Criamos aplicações web modernas, responsivas e escaláveis utilizando as melhores tecnologias do mercado.
+                </p>
+                <div class="service-features">
+                    <span class="feature-tag">React</span>
+                    <span class="feature-tag">Django</span>
+                    <span class="feature-tag">Node.js</span>
+                    <span class="feature-tag">Next.js</span>
+                </div>
+                <a href="{% url 'core:services' %}" class="service-link">
+                    Saiba Mais <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="service-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="service-icon">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <h3 class="service-title">DevOps & Cloud</h3>
+                <p class="service-description">
+                    Automatizamos processos, otimizamos infraestrutura e garantimos alta disponibilidade para sua aplicação.
+                </p>
+                <div class="service-features">
+                    <span class="feature-tag">Docker</span>
+                    <span class="feature-tag">Kubernetes</span>
+                    <span class="feature-tag">AWS</span>
+                    <span class="feature-tag">GCP</span>
+                </div>
+                <a href="{% url 'core:services' %}" class="service-link">
+                    Saiba Mais <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="service-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="service-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="service-title">Aplicativos Mobile</h3>
+                <p class="service-description">
+                    Desenvolvemos aplicativos nativos e híbridos para iOS e Android com foco na experiência do usuário.
+                </p>
+                <div class="service-features">
+                    <span class="feature-tag">React Native</span>
+                    <span class="feature-tag">Flutter</span>
+                    <span class="feature-tag">iOS</span>
+                    <span class="feature-tag">Android</span>
+                </div>
+                <a href="{% url 'core:services' %}" class="service-link">
+                    Saiba Mais <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="service-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="service-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h3 class="service-title">Banco de Dados</h3>
+                <p class="service-description">
+                    Modelagem, otimização e administração de bancos de dados relacionais e NoSQL para máxima performance.
+                </p>
+                <div class="service-features">
+                    <span class="feature-tag">PostgreSQL</span>
+                    <span class="feature-tag">MongoDB</span>
+                    <span class="feature-tag">Redis</span>
+                    <span class="feature-tag">MySQL</span>
+                </div>
+                <a href="{% url 'core:services' %}" class="service-link">
+                    Saiba Mais <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="service-card" data-aos="fade-up" data-aos-delay="500">
+                <div class="service-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="service-title">Consultoria em TI</h3>
+                <p class="service-description">
+                    Análise estratégica e implementação de soluções tecnológicas para otimizar processos empresariais.
+                </p>
+                <div class="service-features">
+                    <span class="feature-tag">Análise</span>
+                    <span class="feature-tag">Otimização</span>
+                    <span class="feature-tag">Estratégia</span>
+                    <span class="feature-tag">Inovação</span>
+                </div>
+                <a href="{% url 'core:services' %}" class="service-link">
+                    Saiba Mais <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="service-card" data-aos="fade-up" data-aos-delay="600">
+                <div class="service-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="service-title">Segurança Cibernética</h3>
+                <p class="service-description">
+                    Proteção completa contra ameaças digitais com auditoria, monitoramento e implementação de medidas de segurança.
+                </p>
+                <div class="service-features">
+                    <span class="feature-tag">Auditoria</span>
+                    <span class="feature-tag">Firewall</span>
+                    <span class="feature-tag">Monitoramento</span>
+                    <span class="feature-tag">Proteção</span>
+                </div>
+                <a href="{% url 'core:services' %}" class="service-link">
+                    Saiba Mais <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about" id="about">
+    <div class="container">
+        <div class="about-content">
+            <div class="about-text" data-aos="fade-right">
+                <h2 class="section-title">Por que escolher a Ávila DevOps?</h2>
+                <p class="about-description">
+                    Somos uma empresa especializada em transformação digital, com foco em entregar soluções
+                    tecnológicas que realmente fazem a diferença no seu negócio.
+                </p>
+
+                <div class="about-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Inovação Constante</h4>
+                            <p>Utilizamos as tecnologias mais avançadas e metodologias ágeis para entregar soluções inovadoras.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Equipe Especializada</h4>
+                            <p>Profissionais certificados e com vasta experiência em projetos de diversos segmentos.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Entrega no Prazo</h4>
+                            <p>Metodologia ágil e processos otimizados garantem entregas dentro do prazo estabelecido.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4>Suporte 24/7</h4>
+                            <p>Suporte técnico completo durante e após a implementação do projeto.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-visual" data-aos="fade-left">
+                <div class="about-stats">
+                    <div class="stat-card">
+                        <div class="stat-number">50+</div>
+                        <div class="stat-label">Projetos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">10+</div>
+                        <div class="stat-label">Anos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">100+</div>
+                        <div class="stat-label">Clientes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">Suporte</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Portfolio Section -->
+<section class="portfolio" id="portfolio">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title">Projetos em Destaque</h2>
+            <p class="section-subtitle">
+                Conheça alguns dos nossos trabalhos e veja como transformamos ideias em realidade
+            </p>
+        </div>
+
+        <div class="portfolio-filters" data-aos="fade-up" data-aos-delay="200">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="web">Web</button>
+            <button class="filter-btn" data-filter="mobile">Mobile</button>
+            <button class="filter-btn" data-filter="cloud">Cloud</button>
+            <button class="filter-btn" data-filter="ecommerce">E-commerce</button>
+        </div>
+
+        <div class="portfolio-grid">
+            <div class="portfolio-item" data-category="web" data-aos="fade-up" data-aos-delay="100">
+                <div class="portfolio-image">
+                    <div class="portfolio-overlay">
+                        <div class="portfolio-links">
+                            <a href="#" class="portfolio-link"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="portfolio-link"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-content">
+                    <div class="portfolio-tags">
+                        <span class="tag">Django</span>
+                        <span class="tag">React</span>
+                        <span class="tag">PostgreSQL</span>
+                    </div>
+                    <h3 class="portfolio-title">Sistema de Gestão Empresarial</h3>
+                    <p class="portfolio-description">
+                        Plataforma completa para gestão de empresas com controle de estoque, financeiro e relatórios.
+                    </p>
+                </div>
+            </div>
+
+            <div class="portfolio-item" data-category="ecommerce" data-aos="fade-up" data-aos-delay="200">
+                <div class="portfolio-image">
+                    <div class="portfolio-overlay">
+                        <div class="portfolio-links">
+                            <a href="#" class="portfolio-link"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="portfolio-link"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-content">
+                    <div class="portfolio-tags">
+                        <span class="tag">Next.js</span>
+                        <span class="tag">Stripe</span>
+                        <span class="tag">Prisma</span>
+                    </div>
+                    <h3 class="portfolio-title">Plataforma E-commerce</h3>
+                    <p class="portfolio-description">
+                        Loja virtual moderna com integração de pagamentos, gestão de produtos e analytics.
+                    </p>
+                </div>
+            </div>
+
+            <div class="portfolio-item" data-category="mobile" data-aos="fade-up" data-aos-delay="300">
+                <div class="portfolio-image">
+                    <div class="portfolio-overlay">
+                        <div class="portfolio-links">
+                            <a href="#" class="portfolio-link"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="portfolio-link"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-content">
+                    <div class="portfolio-tags">
+                        <span class="tag">React Native</span>
+                        <span class="tag">Node.js</span>
+                        <span class="tag">MongoDB</span>
+                    </div>
+                    <h3 class="portfolio-title">Aplicativo de Delivery</h3>
+                    <p class="portfolio-description">
+                        App completo para restaurantes com rastreamento em tempo real e gestão de pedidos.
+                    </p>
+                </div>
+            </div>
+
+            <div class="portfolio-item" data-category="cloud" data-aos="fade-up" data-aos-delay="400">
+                <div class="portfolio-image">
+                    <div class="portfolio-overlay">
+                        <div class="portfolio-links">
+                            <a href="#" class="portfolio-link"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="portfolio-link"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-content">
+                    <div class="portfolio-tags">
+                        <span class="tag">Docker</span>
+                        <span class="tag">Kubernetes</span>
+                        <span class="tag">AWS</span>
+                    </div>
+                    <h3 class="portfolio-title">Infraestrutura Cloud</h3>
+                    <p class="portfolio-description">
+                        Migração e otimização de infraestrutura para nuvem com alta disponibilidade e escalabilidade.
+                    </p>
+                </div>
+            </div>
+
+            <div class="portfolio-item" data-category="web" data-aos="fade-up" data-aos-delay="500">
+                <div class="portfolio-image">
+                    <div class="portfolio-overlay">
+                        <div class="portfolio-links">
+                            <a href="#" class="portfolio-link"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="portfolio-link"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-content">
+                    <div class="portfolio-tags">
+                        <span class="tag">Vue.js</span>
+                        <span class="tag">Laravel</span>
+                        <span class="tag">MySQL</span>
+                    </div>
+                    <h3 class="portfolio-title">Plataforma Educacional</h3>
+                    <p class="portfolio-description">
+                        Sistema de gestão para instituições de ensino com módulos para alunos, professores e administração.
+                    </p>
+                </div>
+            </div>
+
+            <div class="portfolio-item" data-category="mobile" data-aos="fade-up" data-aos-delay="600">
+                <div class="portfolio-image">
+                    <div class="portfolio-overlay">
+                        <div class="portfolio-links">
+                            <a href="#" class="portfolio-link"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="portfolio-link"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-content">
+                    <div class="portfolio-tags">
+                        <span class="tag">Flutter</span>
+                        <span class="tag">Firebase</span>
+                        <span class="tag">Google Maps</span>
+                    </div>
+                    <h3 class="portfolio-title">App de Transporte</h3>
+                    <p class="portfolio-description">
+                        Aplicativo para empresas de transporte com rastreamento GPS e gestão de frota.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="portfolio-cta" data-aos="fade-up">
+            <h3>Quer ver mais projetos?</h3>
+            <p>Conheça nosso portfólio completo e descubra como podemos ajudar seu negócio</p>
+            <a href="{% url 'core:portfolio' %}" class="btn btn-outline">
+                Ver Todos os Projetos <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title">O que nossos clientes dizem</h2>
+            <p class="section-subtitle">
+                A satisfação dos nossos clientes é o nosso maior reconhecimento
+            </p>
+        </div>
+
+        <div class="testimonials-slider">
+            <div class="testimonial-item active" data-aos="fade-up">
+                <div class="testimonial-content">
+                    <div class="testimonial-text">
+                        "A Ávila DevOps transformou completamente nossa operação. O sistema que desenvolveram
+                        aumentou nossa eficiência em 40% e reduziu custos operacionais significativamente."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <h4>Carlos Mendes</h4>
+                            <p>CEO, TechSolutions Ltda</p>
+                        </div>
+                        <div class="author-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-item" data-aos="fade-up" data-aos-delay="200">
+                <div class="testimonial-content">
+                    <div class="testimonial-text">
+                        "Profissionalismo excepcional! Entregaram o projeto no prazo, dentro do orçamento
+                        e superando todas as expectativas. Recomendo sem dúvidas!"
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <h4>Ana Carolina</h4>
+                            <p>Diretora de TI, InovaCorp</p>
+                        </div>
+                        <div class="author-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-item" data-aos="fade-up" data-aos-delay="400">
+                <div class="testimonial-content">
+                    <div class="testimonial-text">
+                        "O suporte pós-implementação é impecável. Sempre disponíveis para ajudar e
+                        implementar melhorias. Parceiros ideais para qualquer projeto de tecnologia."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <h4>Roberto Silva</h4>
+                            <p>CTO, DataSystems</p>
+                        </div>
+                        <div class="author-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="contact" id="contact">
+    <div class="container">
+        <div class="contact-content">
+            <div class="contact-info" data-aos="fade-right">
+                <h2 class="section-title">Vamos conversar sobre seu projeto?</h2>
+                <p class="contact-description">
+                    Entre em contato conosco e descubra como podemos ajudar a transformar suas ideias em realidade.
+                </p>
+
+                <div class="contact-methods">
+                    <div class="contact-method">
+                        <div class="method-icon">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <div class="method-content">
+                            <h4>WhatsApp</h4>
+                            <p>+55 17 99781-1471</p>
+                            <a href="https://wa.me/5517997811471" target="_blank">Iniciar conversa</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-method">
+                        <div class="method-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="method-content">
+                            <h4>Email</h4>
+                            <p>dev@aviladevops.com.br</p>
+                            <a href="mailto:dev@aviladevops.com.br">Enviar email</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-method">
+                        <div class="method-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="method-content">
+                            <h4>Telefone</h4>
+                            <p>+55 17 99781-1471</p>
+                            <a href="tel:+5517997811471">Ligar agora</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-method">
+                        <div class="method-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="method-content">
+                            <h4>Localização</h4>
+                            <p>São José do Rio Preto, SP</p>
+                            <a href="https://goo.gl/maps/sjrp" target="_blank">Ver no mapa</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form-container" data-aos="fade-left">
+                <form class="contact-form" id="contact-form">
+                    <div class="form-group">
+                        <label for="name">Nome Completo *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Telefone</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Empresa</label>
+                        <input type="text" id="company" name="company">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Assunto *</label>
+                        <select id="subject" name="subject" required>
+                            <option value="">Selecione um assunto</option>
+                            <option value="desenvolvimento-web">Desenvolvimento Web</option>
+                            <option value="devops-cloud">DevOps & Cloud</option>
+                            <option value="mobile">Aplicativos Mobile</option>
+                            <option value="consultoria">Consultoria em TI</option>
+                            <option value="seguranca">Segurança Cibernética</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Mensagem *</label>
+                        <textarea id="message" name="message" rows="5" placeholder="Conte-nos sobre seu projeto..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" id="privacy" name="privacy" required>
+                            <label for="privacy">
+                                Concordo com a <a href="#" target="_blank">Política de Privacidade</a> *
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <span class="btn-text">Enviar Mensagem</span>
+                        <span class="btn-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> Enviando...
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+    <div class="container">
+        <div class="cta-content" data-aos="zoom-in">
+            <h2 class="cta-title">Pronto para transformar seu negócio?</h2>
+            <p class="cta-description">
+                Vamos conversar sobre seu projeto e descobrir como podemos ajudar você a alcançar seus objetivos.
+            </p>
+            <div class="cta-actions">
+                <a href="https://wa.me/5517997811471" class="btn btn-primary btn-large">
+                    <i class="fab fa-whatsapp"></i>
+                    Fale pelo WhatsApp
+                </a>
+                <a href="mailto:dev@aviladevops.com.br" class="btn btn-outline btn-large">
+                    <i class="fas fa-envelope"></i>
+                    Enviar Email
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Certificados Digitais - XML Manager{% endblock %}
+
+{% block content %}
+<div class="fade-in-up">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">
+                <i class="bi bi-shield-lock text-sky-400 mr-3"></i>
+                Certificados Digitais
+            </h1>
+            <p class="text-gray-400">Gerencie seus certificados para consultas automáticas na SEFAZ</p>
+        </div>
+        <a href="{% url 'certificado_upload' %}" 
+           class="mt-4 md:mt-0 px-6 py-3 bg-gradient-to-r from-sky-500 to-cyan-500 text-white rounded-xl font-semibold hover:scale-105 transition-transform shadow-lg btn-mobile">
+            <i class="bi bi-plus-circle mr-2"></i>
+            Adicionar Certificado
+        </a>
+    </div>
+
+    <!-- Lista de Certificados -->
+    {% if certificados %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for cert in certificados %}
+        <div class="glass-white rounded-2xl p-6 hover-lift">
+            <!-- Status -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    {% if cert.esta_valido %}
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                        <i class="bi bi-check-circle mr-1"></i>
+                        Válido
+                    </span>
+                    {% else %}
+                    <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
+                        <i class="bi bi-x-circle mr-1"></i>
+                        Expirado
+                    </span>
+                    {% endif %}
+                    
+                    {% if cert.ativo %}
+                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                        Ativo
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Menu -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" class="text-gray-400 hover:text-gray-600">
+                        <i class="bi bi-three-dots-vertical text-xl"></i>
+                    </button>
+                    <div x-show="open" 
+                         @click.away="open = false"
+                         x-transition
+                         class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg z-10 py-2">
+                        <a href="{% url 'consulta_sefaz' cert.id %}" 
+                           class="block px-4 py-2 hover:bg-gray-100">
+                            <i class="bi bi-search mr-2"></i>
+                            Consultar SEFAZ
+                        </a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-100">
+                            <i class="bi bi-pencil mr-2"></i>
+                            Editar
+                        </a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-red-600">
+                            <i class="bi bi-trash mr-2"></i>
+                            Excluir
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Informações -->
+            <div class="mb-4">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">
+                    <i class="bi bi-file-earmark-lock text-sky-600 mr-2"></i>
+                    {{ cert.nome }}
+                </h3>
+                <p class="text-sm text-gray-600">
+                    <i class="bi bi-building mr-2"></i>
+                    CNPJ: {{ cert.cnpj|slice:":2" }}.{{ cert.cnpj|slice:"2:5" }}.{{ cert.cnpj|slice:"5:8" }}/{{ cert.cnpj|slice:"8:12" }}-{{ cert.cnpj|slice:"12:" }}
+                </p>
+            </div>
+            
+            <!-- Validade -->
+            <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                <p class="text-xs text-gray-500 mb-1">Validade</p>
+                <p class="text-sm font-semibold text-gray-700">
+                    {{ cert.validade_inicio|date:"d/m/Y" }} até {{ cert.validade_fim|date:"d/m/Y" }}
+                </p>
+            </div>
+            
+            <!-- Última Consulta -->
+            {% if cert.ultima_consulta %}
+            <div class="text-xs text-gray-500 mb-4">
+                <i class="bi bi-clock mr-1"></i>
+                Última consulta: {{ cert.ultima_consulta|date:"d/m/Y H:i" }}
+            </div>
+            {% endif %}
+            
+            <!-- Consulta Automática -->
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-sm text-gray-600">Consulta Automática</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" 
+                           {% if cert.consulta_automatica %}checked{% endif %}
+                           class="sr-only peer"
+                           onchange="toggleConsultaAutomatica({{ cert.id }}, this.checked)">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                </label>
+            </div>
+            
+            <!-- Ações -->
+            <div class="grid grid-cols-2 gap-2">
+                <a href="{% url 'consulta_sefaz' cert.id %}" 
+                   class="px-4 py-2 bg-sky-500 text-white rounded-lg text-center hover:bg-sky-600 transition-colors text-sm font-semibold btn-mobile">
+                    <i class="bi bi-search mr-1"></i>
+                    Consultar
+                </a>
+                <a href="#" 
+                   class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-center hover:bg-gray-300 transition-colors text-sm font-semibold btn-mobile">
+                    <i class="bi bi-gear mr-1"></i>
+                    Config
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Estado Vazio -->
+    <div class="glass-white rounded-2xl p-12 text-center">
+        <div class="inline-flex items-center justify-center w-24 h-24 bg-sky-100 rounded-full mb-6">
+            <i class="bi bi-shield-lock text-sky-600 text-5xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-3">Nenhum certificado cadastrado</h3>
+        <p class="text-gray-600 mb-6 max-w-md mx-auto">
+            Adicione um certificado digital A1 (.pfx) para começar a consultar documentos fiscais automaticamente na SEFAZ.
+        </p>
+        <a href="{% url 'certificado_upload' %}" 
+           class="inline-block px-8 py-3 bg-gradient-to-r from-sky-500 to-cyan-500 text-white rounded-xl font-semibold hover:scale-105 transition-transform shadow-lg">
+            <i class="bi bi-plus-circle mr-2"></i>
+            Adicionar Primeiro Certificado
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Informações -->
+    <div class="mt-8 glass-white rounded-2xl p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">
+            <i class="bi bi-info-circle text-sky-600 mr-2"></i>
+            Como funciona?
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0 w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
+                    <span class="text-sky-600 font-bold">1</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-1">Upload do Certificado</h4>
+                    <p class="text-sm text-gray-600">Faça upload do seu certificado digital A1 (.pfx) e senha</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0 w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
+                    <span class="text-sky-600 font-bold">2</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-1">Consultar SEFAZ</h4>
+                    <p class="text-sm text-gray-600">Busque automaticamente NFes e CTes onde seu CNPJ aparece</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0 w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center">
+                    <span class="text-sky-600 font-bold">3</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-1">Importar Documentos</h4>
+                    <p class="text-sm text-gray-600">Importe os XMLs encontrados para o sistema</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleConsultaAutomatica(certId, enabled) {
+    fetch(`/api/certificado/${certId}/toggle-automatica/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ enabled: enabled })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            // Mostrar notificação
+        }
+    });
+}
+</script>
+{% endblock %}

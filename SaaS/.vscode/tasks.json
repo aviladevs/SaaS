@@ -1,0 +1,165 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Django: Run Server",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["manage.py", "runserver", "8000"],
+      "options": {
+        "cwd": "${workspaceFolder}/app-aviladevops"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Django: Make Migrations",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["manage.py", "makemigrations"],
+      "options": {
+        "cwd": "${workspaceFolder}/app-aviladevops"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Django: Migrate",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["manage.py", "migrate"],
+      "options": {
+        "cwd": "${workspaceFolder}/app-aviladevops"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Django: Create Superuser",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["manage.py", "createsuperuser"],
+      "options": {
+        "cwd": "${workspaceFolder}/app-aviladevops"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Django: Test Google OAuth",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["test_google_oauth.py"],
+      "options": {
+        "cwd": "${workspaceFolder}/app-aviladevops"
+      },
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Mobile: Start Expo",
+      "type": "shell",
+      "command": "npm",
+      "args": ["start"],
+      "options": {
+        "cwd": "${workspaceFolder}/mobile-app"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Mobile: Install Dependencies",
+      "type": "shell",
+      "command": "npm",
+      "args": ["install", "--legacy-peer-deps"],
+      "options": {
+        "cwd": "${workspaceFolder}/mobile-app"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Mobile: Build Android",
+      "type": "shell",
+      "command": "npx",
+      "args": ["eas", "build", "--platform", "android"],
+      "options": {
+        "cwd": "${workspaceFolder}/mobile-app"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Mobile: Build iOS",
+      "type": "shell",
+      "command": "npx",
+      "args": ["eas", "build", "--platform", "ios"],
+      "options": {
+        "cwd": "${workspaceFolder}/mobile-app"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Project: Full Setup",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Mobile: Install Dependencies",
+        "Django: Make Migrations",
+        "Django: Migrate",
+        "Django: Test Google OAuth"
+      ]
+    }
+  ]
+}

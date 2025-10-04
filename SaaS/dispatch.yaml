@@ -1,0 +1,16 @@
+dispatch:
+  # Landing Page - domínio principal
+  - url: "aviladevops.com.br/*"
+    service: landing-page
+
+  # Sistema de reciclagem
+  - url: "sistema.aviladevops.com.br/*"
+    service: sistema
+
+  # Fiscal Analytics
+  - url: "fiscal.aviladevops.com.br/*"
+    service: fiscal
+
+  # Clínica Management
+  - url: "clinica.aviladevops.com.br/*"
+    service: default

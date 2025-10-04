@@ -1,0 +1,157 @@
+{
+  "project": {
+    "name": "SaaS NFe/CTe Management System",
+    "version": "1.0.0",
+    "description": "Sistema completo de gerenciamento de NFe/CTe com mobile app React Native",
+    "organization": "Ávila DevOps"
+  },
+  "environments": {
+    "development": {
+      "backend": {
+        "url": "http://localhost:8000",
+        "debug": true,
+        "database": "postgresql://postgres:postgres@localhost:5432/aviladevops_saas_dev"
+      },
+      "mobile": {
+        "api_url": "http://localhost:8000",
+        "expo_environment": "development"
+      }
+    },
+    "production": {
+      "backend": {
+        "url": "https://api.aviladevops.com.br",
+        "debug": false,
+        "database": "postgresql://user:pass@prod-db-host:5432/saas_prod"
+      },
+      "mobile": {
+        "api_url": "https://api.aviladevops.com.br",
+        "expo_environment": "production"
+      }
+    }
+  },
+  "google_cloud": {
+    "project_id": "principaldevops",
+    "oauth": {
+      "client_id_env": "GOOGLE_CLIENT_ID",
+      "client_secret_env": "GOOGLE_CLIENT_SECRET"
+    },
+    "kms": {
+      "project_id": "principaldevops",
+      "location": "global",
+      "key_ring": "saas-nfe-keyring",
+      "key_name": "saas-database-key",
+      "key_uri": "projects/principaldevops/locations/global/keyRings/saas-nfe-keyring/cryptoKeys/saas-database-key"
+    },
+    "storage": {
+      "bucket_name": "aviladevops-saas-storage",
+      "credentials_file": "./google-credentials/service-account-key.json"
+    }
+  },
+  "services": {
+    "email": {
+      "backend": "django.core.mail.backends.smtp.EmailBackend",
+      "host": "smtp.gmail.com",
+      "port": 587,
+      "use_tls": true,
+      "from_email": "noreply@aviladevops.com.br"
+    },
+    "monitoring": {
+      "sentry": {
+        "dsn": "https://your-sentry-dsn@o4504807625416704.ingest.sentry.io/project-id",
+        "environment": "development"
+      },
+      "google_analytics": {
+        "id": "G-XXXXXXXXXX",
+        "tag_manager_id": "GTM-XXXXXXX"
+      }
+    },
+    "payments": {
+      "stripe": {
+        "public_key": "pk_test_your_stripe_public_key",
+        "secret_key": "sk_test_your_stripe_secret_key",
+        "webhook_secret": "whsec_your_webhook_secret"
+      },
+      "mercado_pago": {
+        "access_token": "your-mercado-pago-token",
+        "public_key": "your-mercado-pago-public-key"
+      }
+    }
+  },
+  "security": {
+    "ssl_redirect": true,
+    "hsts_seconds": 31536000,
+    "hsts_include_subdomains": true,
+    "session_cookie_secure": true,
+    "csrf_cookie_secure": true,
+    "jwt": {
+      "algorithm": "HS256",
+      "expires_in": 3600,
+      "refresh_expires_in": 86400
+    }
+  },
+  "api": {
+    "version": "v1",
+    "rate_limit": "1000/hour",
+    "cors": {
+      "allow_all_origins": true,
+      "allowed_hosts": [
+        "localhost",
+        "127.0.0.1",
+        ".aviladevops.com.br"
+      ]
+    }
+  },
+  "features": {
+    "google_registration": true,
+    "auto_superuser": true,
+    "static_collection": true,
+    "admin": {
+      "username": "admin",
+      "email": "admin@aviladevops.com.br",
+      "password": "admin123"
+    }
+  },
+  "mobile_app": {
+    "name": "SaaS NFe/CTe Mobile",
+    "version": "1.0.0",
+    "stack": {
+      "framework": "React Native 0.72",
+      "platform": "Expo SDK 49",
+      "language": "TypeScript",
+      "state_management": "Redux Toolkit",
+      "navigation": "React Navigation v6"
+    },
+    "features": {
+      "google_oauth": true,
+      "biometric_auth": true,
+      "offline_support": true,
+      "push_notifications": false,
+      "qr_scanner": false
+    }
+  },
+  "deployment": {
+    "backend": {
+      "platform": "Google Cloud Run",
+      "container": "Docker",
+      "database": "Cloud SQL PostgreSQL",
+      "storage": "Google Cloud Storage"
+    },
+    "mobile": {
+      "build_service": "Expo Application Services (EAS)",
+      "stores": ["Google Play Store", "Apple App Store"],
+      "ota_updates": "Expo CodePush"
+    }
+  },
+  "development": {
+    "tools": {
+      "backend": ["Django", "PostgreSQL", "Redis", "Python 3.11+"],
+      "mobile": ["React Native", "Expo", "TypeScript", "Jest"],
+      "devops": ["Docker", "GitHub Actions", "Terraform", "GCP"]
+    },
+    "dependencies": {
+      "backend_count": 25,
+      "mobile_count": 48,
+      "total_packages": 73
+    }
+  }
+}

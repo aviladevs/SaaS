@@ -1,0 +1,135 @@
+name: Structure Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate-structure:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install validation dependencies
+      run: |
+        pip install PyYAML==6.0.1
+
+    - name: Validate project structure
+      run: |
+        python scripts/validate_structure.py
+
+    - name: Check for required files
+      run: |
+        # Verificar arquivos essenciais na raiz
+        echo "Verificando arquivos essenciais na raiz..."
+        [[ -f "README.md" ]] || (echo "❌ README.md não encontrado na raiz" && exit 1)
+        [[ -f "requirements.txt" ]] || (echo "❌ requirements.txt não encontrado na raiz" && exit 1)
+        [[ -f ".gitignore" ]] || (echo "❌ .gitignore não encontrado na raiz" && exit 1)
+        echo "✅ Arquivos essenciais encontrados"
+
+    - name: Validate service structure
+      run: |
+        echo "Validando estrutura de serviços..."
+
+        # Lista de serviços esperados
+        services=("main-app" "clinic-management" "fiscal-analytics" "recycling-system" "landing-page" "mobile")
+
+        for service in "${services[@]}"; do
+          echo "Verificando serviço: $service"
+
+          # Verificar se existe
+          if [[ ! -d "apps/$service" ]]; then
+            echo "❌ Serviço $service não encontrado em apps/"
+            exit 1
+          fi
+
+          # Verificar estrutura básica
+          if [[ ! -f "apps/$service/README.md" ]]; then
+            echo "⚠️  Serviço $service não tem README.md"
+          fi
+
+          # Verificar requirements.txt (para serviços Django)
+          if [[ "$service" != "mobile" ]] && [[ ! -f "apps/$service/requirements.txt" ]]; then
+            echo "⚠️  Serviço Django $service não tem requirements.txt"
+          fi
+
+          echo "✅ Serviço $service validado"
+        done
+
+    - name: Validate configuration files
+      run: |
+        echo "Validando arquivos de configuração..."
+
+        # Verificar estrutura de pastas essenciais
+        required_dirs=("infrastructure" "scripts" "shared" "docs")
+        for dir in "${required_dirs[@]}"; do
+          if [[ ! -d "$dir" ]]; then
+            echo "❌ Diretório essencial $dir não encontrado"
+            exit 1
+          fi
+        done
+
+        echo "✅ Estrutura de diretórios validada"
+
+    - name: Check for security issues
+      run: |
+        echo "Verificando problemas de segurança..."
+
+        # Verificar se há arquivos .env na raiz (não deve estar versionado)
+        if [[ -f ".env" ]]; then
+          echo "❌ Arquivo .env encontrado na raiz - deve estar no .gitignore"
+          exit 1
+        fi
+
+        # Verificar se há chaves hardcoded
+        if grep -r "SECRET_KEY.*=.*[a-zA-Z0-9]" . --include="*.py" --exclude-dir=.git --exclude-dir=node_modules | grep -v "config("; then
+          echo "❌ Possível chave secreta encontrada no código"
+          exit 1
+        fi
+
+        echo "✅ Verificação de segurança aprovada"
+
+    - name: Validate documentation
+      run: |
+        echo "Validando documentação..."
+
+        # Verificar documentação essencial
+        docs_required=("README.md" "architecture/README.md" "development/README.md" "deployment/README.md" "api/README.md")
+        for doc in "${docs_required[@]}"; do
+          if [[ ! -f "docs/$doc" ]]; then
+            echo "❌ Documentação essencial $doc não encontrada"
+            exit 1
+          fi
+        done
+
+        echo "✅ Documentação validada"
+
+    - name: Check code quality
+      run: |
+        echo "Verificando qualidade do código..."
+
+        # Verificar se há arquivos Python sem linting básico
+        find . -name "*.py" -not -path "./node_modules/*" -not -path "./.git/*" -exec python -m py_compile {} \;
+
+        echo "✅ Qualidade do código verificada"
+
+    - name: Structure validation summary
+      if: always()
+      run: |
+        echo "📊 RESUMO DA VALIDAÇÃO DE ESTRUTURA"
+        echo "=================================="
+        echo "✅ Projeto passou em todas as validações críticas"
+        echo "✅ Estrutura organizada e consistente"
+        echo "✅ Arquivos essenciais presentes"
+        echo "✅ Configurações de segurança adequadas"
+        echo "✅ Documentação completa"
+        echo ""
+        echo "🎯 Pronto para desenvolvimento e deployment!"

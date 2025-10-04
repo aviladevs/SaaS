@@ -1,0 +1,54 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Django: Debug Server",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app-aviladevops/manage.py",
+      "args": [
+        "runserver",
+        "8000"
+      ],
+      "django": true,
+      "autoReload": {
+        "enable": true
+      },
+      "env": {
+        "DJANGO_DEBUG": "True"
+      },
+      "cwd": "${workspaceFolder}/app-aviladevops",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Django: Test Google OAuth",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app-aviladevops/test_google_oauth.py",
+      "cwd": "${workspaceFolder}/app-aviladevops",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Django: Run Tests",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app-aviladevops/manage.py",
+      "args": [
+        "test"
+      ],
+      "django": true,
+      "cwd": "${workspaceFolder}/app-aviladevops",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

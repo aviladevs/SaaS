@@ -1,0 +1,26 @@
+runtime: python313
+
+env: standard
+
+instance_class: F2
+
+automatic_scaling:
+  min_instances: 1
+  max_instances: 10
+  target_cpu_utilization: 0.6
+
+env_variables:
+  DEBUG: "False"
+  SECRET_KEY: "4ps=r*x2!$n2*%(t(go@25q(hv6k06vgs*of+_0188h9cunw&j"
+  DATABASE_URL: "sqlite:///db.sqlite3"
+  ALLOWED_HOSTS: "*"
+  GOOGLE_CLOUD_PROJECT: "principaldevops"
+
+handlers:
+- url: /static
+  static_dir: staticfiles
+  secure: always
+
+- url: /.*
+  script: auto
+  secure: always

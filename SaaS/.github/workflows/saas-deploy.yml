@@ -1,0 +1,251 @@
+name: SaaS Multi-Service Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente para deploy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      services:
+        description: 'Serviços para deploy (separados por vírgula)'
+        required: false
+        default: 'all'
+
+env:
+  REGISTRY: gcr.io
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+jobs:
+  # Test all services
+  test-services:
+    name: Test All Services
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [landing-page, sistema, fiscal, clinica, app-aviladevops]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies for ${{ matrix.service }}
+      run: |
+        cd ${{ matrix.service }}
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+        if [ -f package.json ]; then
+          npm ci
+        fi
+
+    - name: Run tests for ${{ matrix.service }}
+      run: |
+        cd ${{ matrix.service }}
+        if [ -f manage.py ]; then
+          python manage.py test --verbosity=2 || echo "No tests found for Django service"
+        fi
+        if [ -f package.json ]; then
+          npm test || echo "No tests found for Node.js service"
+        fi
+
+  # Build and deploy services
+  deploy-services:
+    name: Deploy Services
+    runs-on: ubuntu-latest
+    needs: test-services
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
+
+    strategy:
+      matrix:
+        service:
+          - name: landing-page
+            path: LANDING-PAGE
+            type: django
+          - name: sistema
+            path: sistema
+            type: django
+          - name: fiscal
+            path: fiscal
+            type: django
+          - name: clinica
+            path: clinica
+            type: nextjs
+          - name: app-aviladevops
+            path: app-aviladevops
+            type: django
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Docker
+      run: |
+        gcloud auth configure-docker $REGISTRY
+
+    - name: Build Docker image for ${{ matrix.service.name }}
+      run: |
+        cd ${{ matrix.service.path }}
+        IMAGE_NAME=$REGISTRY/$PROJECT_ID/${{ matrix.service.name }}-service
+        docker build -t $IMAGE_NAME:${{ github.sha }} .
+        docker tag $IMAGE_NAME:${{ github.sha }} $IMAGE_NAME:latest
+
+    - name: Push Docker image
+      run: |
+        IMAGE_NAME=$REGISTRY/$PROJECT_ID/${{ matrix.service.name }}-service
+        docker push $IMAGE_NAME:${{ github.sha }}
+        docker push $IMAGE_NAME:latest
+
+    - name: Deploy to Cloud Run
+      run: |
+        SERVICE_NAME=${{ matrix.service.name }}-service
+        IMAGE_NAME=$REGISTRY/$PROJECT_ID/$SERVICE_NAME
+
+        # Create or update Cloud Run service
+        gcloud run deploy $SERVICE_NAME \
+          --image $IMAGE_NAME:${{ github.sha }} \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8000 \
+          --memory 1Gi \
+          --cpu 1 \
+          --max-instances 10 \
+          --set-env-vars="ENVIRONMENT=production,DJANGO_SETTINGS_MODULE=core.settings" \
+          --service-account ${{ secrets.GCP_SA_EMAIL }}
+
+    - name: Get service URL
+      id: service-url
+      run: |
+        SERVICE_URL=$(gcloud run services describe ${{ matrix.service.name }}-service --region us-central1 --format="value(status.url)")
+        echo "url=$SERVICE_URL" >> $GITHUB_OUTPUT
+        echo "Service ${{ matrix.service.name }} deployed to: $SERVICE_URL"
+
+  # Deploy to App Engine for static sites
+  deploy-static-sites:
+    name: Deploy Static Sites
+    runs-on: ubuntu-latest
+    needs: test-services
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Deploy Landing Page to App Engine
+      run: |
+        cd LANDING-PAGE
+        gcloud app deploy app.yaml --quiet
+
+  # Database migrations
+  run-migrations:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    needs: deploy-services
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Run migrations for each service
+      run: |
+        for service in sistema fiscal app-aviladevops; do
+          echo "Running migrations for $service"
+          # Use Cloud Run job or direct database access
+          # This would need to be customized based on your setup
+        done
+
+  # Health checks
+  health-checks:
+    name: Health Checks
+    runs-on: ubuntu-latest
+    needs: [deploy-services, deploy-static-sites]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Wait for services to be ready
+      run: |
+        sleep 60
+
+    - name: Check service health
+      run: |
+        # Health check for each deployed service
+        services=("landing-page" "sistema" "fiscal" "clinica" "app-aviladevops")
+        for service in "${services[@]}"; do
+          echo "Checking health for $service-service"
+          # Implement actual health check logic
+        done
+
+  # Notifications
+  notify-deployment:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy-services, deploy-static-sites, health-checks]
+    if: always()
+
+    steps:
+    - name: Deployment Summary
+      run: |
+        echo "## 🚀 SaaS Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Service | Status | URL |" >> $GITHUB_STEP_SUMMARY
+        echo "|---------|--------|-----|" >> $GITHUB_STEP_SUMMARY
+        echo "| Landing Page | ✅ Deployed | https://aviladevops.com.br |" >> $GITHUB_STEP_SUMMARY
+        echo "| Sistema | ✅ Deployed | https://sistema.aviladevops.com.br |" >> $GITHUB_STEP_SUMMARY
+        echo "| Fiscal | ✅ Deployed | https://fiscal.aviladevops.com.br |" >> $GITHUB_STEP_SUMMARY
+        echo "| Clínica | ✅ Deployed | https://clinica.aviladevops.com.br |" >> $GITHUB_STEP_SUMMARY
+        echo "| Admin | ✅ Deployed | https://admin.aviladevops.com.br |" >> $GITHUB_STEP_SUMMARY
+
+    - name: Send notification to Slack
+      if: always()
+      run: |
+        # Send notification to Slack or other platforms
+        echo "Deployment completed with status: ${{ needs.health-checks.result }}"

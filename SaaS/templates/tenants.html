@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-users"></i> Gestão de Tenants
+        </h1>
+        <p class="lead">Gerencie clientes e configurações multi-tenant</p>
+    </div>
+</div>
+
+<!-- Criar Novo Tenant -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-plus-circle"></i> Criar Novo Tenant</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="action" value="create">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tenant_name" class="form-label">Nome da Empresa *</label>
+                                <input type="text" class="form-control" id="tenant_name" name="tenant_name" required>
+                                <div class="form-text">Nome da empresa ou cliente</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tenant_domain" class="form-label">Domínio Personalizado *</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="tenant_domain" name="tenant_domain" placeholder="empresa" required>
+                                    <span class="input-group-text">.aviladevops.com.br</span>
+                                </div>
+                                <div class="form-text">Subdomínio único para o cliente</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="admin_email" class="form-label">Email do Administrador *</label>
+                                <input type="email" class="form-control" id="admin_email" name="admin_email" required>
+                                <div class="form-text">Email do usuário administrador do tenant</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="plan" class="form-label">Plano</label>
+                                <select class="form-select" id="plan" name="plan">
+                                    <option value="basic">Básico (R$ 97/mês)</option>
+                                    <option value="pro" selected>Profissional (R$ 297/mês)</option>
+                                    <option value="enterprise">Enterprise (R$ 997/mês)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-plus"></i> Criar Tenant
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Tenants -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-list"></i> Tenants Ativos</h5>
+                <button class="btn btn-outline-primary" onclick="listTenants()">
+                    <i class="fas fa-sync"></i> Atualizar Lista
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="tenantsList">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                        <p>Carregando tenants...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes do Tenant -->
+<div class="modal fade" id="tenantModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes do Tenant</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="tenantDetails">
+                <!-- Conteúdo será preenchido dinamicamente -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function listTenants() {
+    document.getElementById('tenantsList').innerHTML = `
+        <div class="text-center text-muted">
+            <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+            <p>Carregando tenants...</p>
+        </div>
+    `;
+
+    // Simular carregamento (em produção, fazer chamada para API)
+    setTimeout(() => {
+        showTenantsList();
+    }, 1000);
+}
+
+function showTenantsList() {
+    const tenants = [
+        {
+            name: 'Empresa ABC Ltda',
+            domain: 'empresa-abc.aviladevops.com.br',
+            plan: 'pro',
+            status: 'active',
+            created_at: '2024-01-10',
+            users: 15,
+            last_access: '2024-01-15 14:30'
+        },
+        {
+            name: 'Clínica Saúde & Vida',
+            domain: 'clinica-saude.aviladevops.com.br',
+            plan: 'enterprise',
+            status: 'active',
+            created_at: '2024-01-05',
+            users: 47,
+            last_access: '2024-01-15 16:45'
+        },
+        {
+            name: 'Reciclagem Verde',
+            domain: 'reciclagem-verde.aviladevops.com.br',
+            plan: 'basic',
+            status: 'trial',
+            created_at: '2024-01-12',
+            users: 3,
+            last_access: '2024-01-15 09:15'
+        }
+    ];
+
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Empresa</th>
+                        <th>Domínio</th>
+                        <th>Plano</th>
+                        <th>Status</th>
+                        <th>Usuários</th>
+                        <th>Último Acesso</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    tenants.forEach(tenant => {
+        const statusBadge = getStatusBadge(tenant.status);
+        const planBadge = getPlanBadge(tenant.plan);
+
+        html += `
+            <tr>
+                <td>
+                    <strong>${tenant.name}</strong>
+                    <br><small class="text-muted">Criado: ${tenant.created_at}</small>
+                </td>
+                <td>
+                    <a href="https://${tenant.domain}" target="_blank">
+                        ${tenant.domain} <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </td>
+                <td>${planBadge}</td>
+                <td>${statusBadge}</td>
+                <td><span class="badge bg-info">${tenant.users} usuários</span></td>
+                <td><small>${tenant.last_access}</small></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="showTenantDetails('${tenant.name}')">
+                        <i class="fas fa-eye"></i> Detalhes
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    document.getElementById('tenantsList').innerHTML = html;
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'active': '<span class="badge bg-success">Ativo</span>',
+        'trial': '<span class="badge bg-warning">Trial</span>',
+        'suspended': '<span class="badge bg-danger">Suspenso</span>',
+        'cancelled': '<span class="badge bg-secondary">Cancelado</span>'
+    };
+    return badges[status] || '<span class="badge bg-secondary">Desconhecido</span>';
+}
+
+function getPlanBadge(plan) {
+    const badges = {
+        'basic': '<span class="badge bg-secondary">Básico</span>',
+        'pro': '<span class="badge bg-primary">Profissional</span>',
+        'enterprise': '<span class="badge bg-success">Enterprise</span>'
+    };
+    return badges[plan] || '<span class="badge bg-secondary">Desconhecido</span>';
+}
+
+function showTenantDetails(tenantName) {
+    // Em produção, buscar dados da API
+    const details = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Informações Gerais</h6>
+                <table class="table table-sm">
+                    <tr><td><strong>Nome:</strong></td><td>${tenantName}</td></tr>
+                    <tr><td><strong>Plano:</strong></td><td>Profissional</td></tr>
+                    <tr><td><strong>Status:</strong></td><td>Ativo</td></tr>
+                    <tr><td><strong>Criado em:</strong></td><td>2024-01-10</td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h6>Uso e Métricas</h6>
+                <table class="table table-sm">
+                    <tr><td><strong>Usuários:</strong></td><td>15/1000</td></tr>
+                    <tr><td><strong>Armazenamento:</strong></td><td>2.3GB/100GB</td></tr>
+                    <tr><td><strong>Último acesso:</strong></td><td>2024-01-15 14:30</td></tr>
+                    <tr><td><strong>Logins hoje:</strong></td><td>23</td></tr>
+                </table>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('tenantDetails').innerHTML = details;
+    new bootstrap.Modal(document.getElementById('tenantModal')).show();
+}
+
+// Carregar lista inicial
+document.addEventListener('DOMContentLoaded', function() {
+    listTenants();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Aplicação principal (para clientes locais)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - app_data:/app/data
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-dev-key-change-in-production
+      - DATABASE_URL=sqlite:///data/db.sqlite3
+      - ENVIRONMENT=development
+    networks:
+      - client-network
+
+  # Banco de dados (SQLite para simplicidade)
+  # Nota: Em produção usa PostgreSQL
+
+  # Redis para cache (opcional para clientes locais)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - client-network
+    profiles:
+      - with-redis
+
+volumes:
+  app_data:
+  redis_data:
+
+networks:
+  client-network:
+    driver: bridge

@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.build/
+dist/
+build/
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# Django
+*.log
+*.pot
+*.py,cover
+local_settings.py
+*.sqlite3
+media/
+staticfiles/
+static_root/
+
+# Coverage, pytest, mypy
+.coverage*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node / Frontend
+node_modules/
+
+# Secrets and environment
+.env
+.env.*
+*.key
+*.pem
+config.json
+
+# App Engine generated
+appengine-generated/
+
+# Project data folders (large, not source)
+CTe/
+NFe/
+Outros/

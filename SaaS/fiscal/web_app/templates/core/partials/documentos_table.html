@@ -1,0 +1,137 @@
+<!-- Tabela de Documentos -->
+{% if documentos %}
+<div class="overflow-x-auto">
+    <table class="w-full">
+        <thead>
+            <tr class="border-b border-gray-200">
+                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                    <input type="checkbox" class="rounded" onclick="selecionarTodos(this)">
+                </th>
+                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Número</th>
+                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Data</th>
+                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Emitente</th>
+                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Destinatário</th>
+                <th class="text-right py-3 px-4 text-sm font-semibold text-gray-700">Valor</th>
+                <th class="text-center py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                <th class="text-center py-3 px-4 text-sm font-semibold text-gray-700">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documentos %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4">
+                    <input type="checkbox" class="rounded doc-checkbox" value="{{ doc.id }}">
+                </td>
+                <td class="py-3 px-4">
+                    <div class="font-semibold text-gray-800">{{ doc.numero }}</div>
+                    <div class="text-xs text-gray-500">Série: {{ doc.serie }}</div>
+                </td>
+                <td class="py-3 px-4">
+                    <div class="text-sm text-gray-700">{{ doc.data_emissao|date:"d/m/Y" }}</div>
+                    <div class="text-xs text-gray-500">{{ doc.data_emissao|date:"H:i" }}</div>
+                </td>
+                <td class="py-3 px-4">
+                    <div class="font-medium text-gray-800">{{ doc.emit_nome|truncatewords:3 }}</div>
+                    <div class="text-xs text-gray-500">{{ doc.emit_cnpj }}</div>
+                </td>
+                <td class="py-3 px-4">
+                    <div class="font-medium text-gray-800">{{ doc.dest_nome|truncatewords:3 }}</div>
+                    <div class="text-xs text-gray-500">{{ doc.dest_cnpj }}</div>
+                </td>
+                <td class="py-3 px-4 text-right">
+                    <div class="font-bold text-gray-800">R$ {{ doc.valor_total|floatformat:2 }}</div>
+                </td>
+                <td class="py-3 px-4 text-center">
+                    {% if doc.importado %}
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                        <i class="bi bi-check-circle mr-1"></i>
+                        Importado
+                    </span>
+                    {% else %}
+                    <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold">
+                        <i class="bi bi-clock mr-1"></i>
+                        Pendente
+                    </span>
+                    {% endif %}
+                </td>
+                <td class="py-3 px-4">
+                    <div class="flex items-center justify-center space-x-2">
+                        {% if not doc.importado %}
+                        <button onclick="importarDocumento({{ doc.id }})" 
+                                class="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                                title="Importar">
+                            <i class="bi bi-download"></i>
+                        </button>
+                        {% endif %}
+                        <button onclick="visualizarXML({{ doc.id }})" 
+                                class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                title="Visualizar XML">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button onclick="baixarXML({{ doc.id }})" 
+                                class="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                                title="Baixar XML">
+                            <i class="bi bi-file-earmark-arrow-down"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginação -->
+{% if documentos.has_other_pages %}
+<div class="mt-6 flex items-center justify-between">
+    <div class="text-sm text-gray-600">
+        Mostrando {{ documentos.start_index }} a {{ documentos.end_index }} de {{ documentos.paginator.count }} documentos
+    </div>
+    <div class="flex space-x-2">
+        {% if documentos.has_previous %}
+        <a href="?page={{ documentos.previous_page_number }}" 
+           class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+            <i class="bi bi-chevron-left"></i>
+        </a>
+        {% endif %}
+        
+        <span class="px-4 py-2 bg-sky-500 text-white rounded-lg font-semibold">
+            {{ documentos.number }}
+        </span>
+        
+        {% if documentos.has_next %}
+        <a href="?page={{ documentos.next_page_number }}" 
+           class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+            <i class="bi bi-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<!-- Estado Vazio -->
+<div class="text-center py-12">
+    <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+        <i class="bi bi-inbox text-gray-400 text-3xl"></i>
+    </div>
+    <h3 class="text-lg font-bold text-gray-800 mb-2">Nenhum documento encontrado</h3>
+    <p class="text-gray-600">Não foram encontrados documentos onde você aparece como {{ papel }}.</p>
+</div>
+{% endif %}
+
+<script>
+function selecionarTodos(checkbox) {
+    document.querySelectorAll('.doc-checkbox').forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+}
+
+function visualizarXML(docId) {
+    window.open(`/api/documento/${docId}/visualizar-xml/`, '_blank');
+}
+
+function baixarXML(docId) {
+    window.location.href = `/api/documento/${docId}/baixar-xml/`;
+}
+</script>

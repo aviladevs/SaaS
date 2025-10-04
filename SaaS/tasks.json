@@ -1,0 +1,249 @@
+{
+  "project_tasks": {
+    "metadata": {
+      "project": "SaaS NFe/CTe Management System",
+      "created": "2025-10-04",
+      "last_updated": "2025-10-04",
+      "version": "1.0.0"
+    },
+    "backend_tasks": {
+      "completed": [
+        {
+          "id": 1,
+          "title": "Google OAuth Service Implementation",
+          "description": "Implementar serviço de autenticação Google OAuth com validação de tokens",
+          "status": "completed",
+          "priority": "high",
+          "files": [
+            "apps/users/services.py",
+            "apps/users/views_oauth.py",
+            "apps/users/serializers.py",
+            "apps/users/urls_oauth.py"
+          ],
+          "completion_date": "2025-10-04"
+        },
+        {
+          "id": 2,
+          "title": "Google Cloud Credentials Configuration",
+          "description": "Configurar credenciais do Google Cloud para OAuth e Service Account",
+          "status": "completed",
+          "priority": "high",
+          "files": [
+            "google-credentials/google-oauth-client.json",
+            "google-credentials/service-account-key.json",
+            ".env"
+          ],
+          "completion_date": "2025-10-04"
+        },
+        {
+          "id": 3,
+          "title": "Environment Variables Standardization",
+          "description": "Padronizar variáveis de ambiente com configurações do Google Cloud",
+          "status": "completed",
+          "priority": "medium",
+          "files": [".env"],
+          "completion_date": "2025-10-04"
+        }
+      ],
+      "pending": [
+        {
+          "id": 4,
+          "title": "Django Settings Google OAuth Integration",
+          "description": "Integrar configurações Google OAuth no settings.py do Django",
+          "status": "pending",
+          "priority": "high",
+          "estimated_hours": 2,
+          "files": ["core/settings.py"],
+          "dependencies": ["task_1", "task_2"]
+        },
+        {
+          "id": 5,
+          "title": "Main URLs OAuth Routes",
+          "description": "Adicionar rotas OAuth ao urls.py principal",
+          "status": "pending",
+          "priority": "high",
+          "estimated_hours": 1,
+          "files": ["core/urls.py"],
+          "dependencies": ["task_1"]
+        },
+        {
+          "id": 6,
+          "title": "Database Migrations",
+          "description": "Executar migrações do banco de dados",
+          "status": "pending",
+          "priority": "medium",
+          "estimated_hours": 1,
+          "dependencies": ["task_4"]
+        }
+      ]
+    },
+    "mobile_tasks": {
+      "completed": [
+        {
+          "id": 7,
+          "title": "React Native Project Structure",
+          "description": "Criar estrutura completa do projeto React Native com Expo",
+          "status": "completed",
+          "priority": "high",
+          "files": [
+            "package.json",
+            "app.json",
+            "eas.json",
+            "tsconfig.json",
+            "App.tsx"
+          ],
+          "completion_date": "2025-10-04"
+        },
+        {
+          "id": 8,
+          "title": "Redux Store Implementation",
+          "description": "Implementar Redux Toolkit com slices para autenticação e dashboard",
+          "status": "completed",
+          "priority": "high",
+          "files": [
+            "src/store/store.ts",
+            "src/store/slices/authSlice.ts",
+            "src/store/slices/dashboardSlice.ts",
+            "src/store/slices/fiscalSlice.ts",
+            "src/store/slices/offlineSlice.ts"
+          ],
+          "completion_date": "2025-10-04"
+        },
+        {
+          "id": 9,
+          "title": "Google OAuth Mobile Integration",
+          "description": "Implementar Google OAuth no mobile app com Expo Auth Session",
+          "status": "completed",
+          "priority": "high",
+          "files": [
+            "src/services/googleAuth.ts",
+            "src/screens/auth/LoginScreen.tsx",
+            ".env"
+          ],
+          "completion_date": "2025-10-04"
+        }
+      ],
+      "pending": [
+        {
+          "id": 10,
+          "title": "Navigation Implementation",
+          "description": "Implementar navegação completa com React Navigation",
+          "status": "pending",
+          "priority": "high",
+          "estimated_hours": 4,
+          "files": ["src/navigation/AppNavigator.tsx"],
+          "dependencies": ["task_8"]
+        },
+        {
+          "id": 11,
+          "title": "Dashboard Components",
+          "description": "Implementar componentes do dashboard (StatsCard, QuickActions, etc.)",
+          "status": "pending",
+          "priority": "medium",
+          "estimated_hours": 6,
+          "files": [
+            "src/components/dashboard/StatsCard.tsx",
+            "src/components/dashboard/QuickActions.tsx",
+            "src/components/dashboard/RecentDocuments.tsx"
+          ],
+          "dependencies": ["task_8"]
+        }
+      ]
+    },
+    "integration_tasks": {
+      "pending": [
+        {
+          "id": 12,
+          "title": "Backend-Mobile OAuth Integration Test",
+          "description": "Testar integração completa entre mobile app e backend Django",
+          "status": "pending",
+          "priority": "critical",
+          "estimated_hours": 3,
+          "dependencies": ["task_4", "task_5", "task_9"]
+        },
+        {
+          "id": 13,
+          "title": "End-to-End Google OAuth Flow",
+          "description": "Testar fluxo completo: Mobile → Google → Django → JWT",
+          "status": "pending",
+          "priority": "critical",
+          "estimated_hours": 2,
+          "dependencies": ["task_12"]
+        }
+      ]
+    },
+    "deployment_tasks": {
+      "pending": [
+        {
+          "id": 14,
+          "title": "Docker Configuration",
+          "description": "Configurar Docker para backend Django",
+          "status": "pending",
+          "priority": "medium",
+          "estimated_hours": 3
+        },
+        {
+          "id": 15,
+          "title": "EAS Build Configuration",
+          "description": "Configurar Expo Application Services para builds iOS/Android",
+          "status": "pending",
+          "priority": "medium",
+          "estimated_hours": 4
+        },
+        {
+          "id": 16,
+          "title": "Google Cloud Deployment",
+          "description": "Deploy do backend no Google Cloud Run",
+          "status": "pending",
+          "priority": "low",
+          "estimated_hours": 6,
+          "dependencies": ["task_14"]
+        }
+      ]
+    },
+    "documentation_tasks": {
+      "completed": [
+        {
+          "id": 17,
+          "title": "Google OAuth Setup Guide",
+          "description": "Documentação completa de configuração Google OAuth",
+          "status": "completed",
+          "priority": "medium",
+          "files": [
+            "SERVICE_ACCOUNT_SETUP.md",
+            "GOOGLE_CREDENTIALS_GUIDE.md",
+            "SETUP_GOOGLE_OAUTH.md",
+            "IMPLEMENTACAO_GOOGLE_OAUTH.md"
+          ],
+          "completion_date": "2025-10-04"
+        },
+        {
+          "id": 18,
+          "title": "Mobile App Documentation",
+          "description": "Documentação completa do mobile app React Native",
+          "status": "completed",
+          "priority": "medium",
+          "files": [
+            "mobile-app/README.md",
+            "MOBILE_APP_STRATEGY.md",
+            "PROJETO_COMPLETADO.md"
+          ],
+          "completion_date": "2025-10-04"
+        }
+      ]
+    },
+    "summary": {
+      "total_tasks": 18,
+      "completed": 8,
+      "pending": 10,
+      "completion_percentage": 44,
+      "critical_pending": 2,
+      "estimated_remaining_hours": 32,
+      "next_priority_tasks": [
+        "Django Settings Google OAuth Integration",
+        "Main URLs OAuth Routes",
+        "Backend-Mobile OAuth Integration Test"
+      ]
+    }
+  }
+}

@@ -1,0 +1,18 @@
+name: "CodeQL Configuration for Python/Django Project"
+
+disable-default-queries: false
+
+queries:
+  - uses: security-and-quality
+  - uses: security-experimental
+
+paths-ignore:
+  - "**/migrations/**"
+  - "**/__pycache__/**"
+  - "**/*.pyc"
+  - "**/node_modules/**"
+  - "**/staticfiles/**"
+  - "**/media/**"
+
+paths:
+  - "web_app"

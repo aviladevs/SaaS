@@ -1,0 +1,58 @@
+runtime: nodejs20
+service: default
+
+instance_class: F2
+
+# Environment settings
+env: flex
+
+# Environment variables
+env_variables:
+  NODE_ENV: production
+  NEXT_PUBLIC_BASE_URL: https://clinica.aviladevops.com.br
+  DB_HOST: '/cloudsql/nicolasrosaab:southamerica-east1:nicolasrosaab-postgres'
+  DB_NAME: app_db
+  DB_USER: nicolasrosaab
+  DB_PASSWORD: 7Aciqgr7@
+  DB_PORT: '5432'
+
+# Configure handlers for Next.js
+handlers:
+  # Serve static files from the .next/static directory
+  - url: /_next/static
+    static_dir: .next/static
+    secure: always
+
+  # Serve static files from the public directory
+  - url: /(.*\.(gif|png|jpg|jpeg|svg|ico|webp|js|css|json|txt))$
+    static_files: public/\1
+    upload: public/.*
+    secure: always
+
+  # Handle all other routes with the Next.js server
+  - url: /.*
+    script: auto
+    secure: always
+
+# Basic scaling configuration
+basic_scaling:
+  max_instances: 5
+  idle_timeout: 10m
+
+# Health check settings
+health_check:
+  enable_health_check: true
+  check_interval_sec: 5
+  timeout_sec: 4
+  unhealthy_threshold: 2
+  healthy_threshold: 2
+
+# Resource settings
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
+
+# Enable App Engine APIs
+beta_settings:
+  cloud_sql_instances: nicolasrosaab:southamerica-east1:nicolasrosaab-postgres

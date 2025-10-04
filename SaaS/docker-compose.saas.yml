@@ -1,0 +1,267 @@
+version: '3.8'
+
+services:
+  # Landing Page
+  landing-page:
+    build:
+      context: ./LANDING-PAGE
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./LANDING-PAGE:/app
+      - landing_page_static:/app/staticfiles
+      - landing_page_media:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-dev-key
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/landing_page
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+
+  # Sistema de Reciclagem
+  recycling-system:
+    build:
+      context: ./sistema
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8001
+    volumes:
+      - ./sistema:/app
+      - sistema_static:/app/staticfiles
+      - sistema_media:/app/media
+    ports:
+      - "8001:8001"
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-dev-key
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/recycling_system
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+
+  # Sistema Fiscal
+  fiscal-system:
+    build:
+      context: ./fiscal
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8002
+    volumes:
+      - ./fiscal:/app
+      - fiscal_static:/app/staticfiles
+      - fiscal_media:/app/media
+    ports:
+      - "8002:8002"
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-dev-key
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/fiscal_system
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+
+  # Clínica Management
+  clinica-system:
+    build:
+      context: ./clinica
+      dockerfile: Dockerfile
+    command: npm run dev
+    volumes:
+      - ./clinica:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - saas-network
+
+  # Aplicação Principal (Admin)
+  main-app:
+    build:
+      context: ./app-aviladevops
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8003
+    volumes:
+      - ./app-aviladevops:/app
+      - main_app_static:/app/staticfiles
+      - main_app_media:/app/media
+    ports:
+      - "8003:8003"
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-dev-key
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/main_app
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+
+  # Banco de dados PostgreSQL
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=aviladevops_saas
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - saas-network
+
+  # Redis para cache e sessões
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - saas-network
+
+  # Nginx - Load Balancer e Proxy Reverso
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/saas.conf:/etc/nginx/conf.d/default.conf
+      - ./ssl:/etc/nginx/ssl
+      - landing_page_static:/app/landing-page/staticfiles:ro
+      - sistema_static:/app/sistema/staticfiles:ro
+      - fiscal_static:/app/fiscal/staticfiles:ro
+      - main_app_static:/app/main-app/staticfiles:ro
+    depends_on:
+      - landing-page
+      - recycling-system
+      - fiscal-system
+      - clinica-system
+      - main-app
+    networks:
+      - saas-network
+
+  # Celery Worker para tarefas assíncronas
+  celery-worker:
+    build:
+      context: ./app-aviladevops
+      dockerfile: Dockerfile
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - ./app-aviladevops:/app
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-dev-key
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/main_app
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+
+  # Celery Beat para tarefas agendadas
+  celery-beat:
+    build:
+      context: ./app-aviladevops
+      dockerfile: Dockerfile
+    command: celery -A core beat --loglevel=info
+    volumes:
+      - ./app-aviladevops:/app
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=django-insecure-dev-key
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/main_app
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+
+  # Elasticsearch para busca avançada
+  elasticsearch:
+    image: elasticsearch:8.8.2
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - saas-network
+
+  # Kibana para visualização de logs
+  kibana:
+    image: kibana:8.8.2
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - saas-network
+
+  # Grafana para métricas
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - saas-network
+
+  # Prometheus para coleta de métricas
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - saas-network
+
+  # Jaeger para tracing distribuído
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14250:14250"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - saas-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  elasticsearch_data:
+  grafana_data:
+  prometheus_data:
+  landing_page_static:
+  landing_page_media:
+  sistema_static:
+  sistema_media:
+  fiscal_static:
+  fiscal_media:
+  main_app_static:
+  main_app_media:
+
+networks:
+  saas-network:
+    driver: bridge

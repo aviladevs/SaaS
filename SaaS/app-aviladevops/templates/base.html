@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block description %}{{ description }}{% endblock %}">
+    <meta name="keywords" content="DevOps, desenvolvimento web, tecnologia, transformação digital, Ávila DevOps">
+    <meta name="author" content="Ávila DevOps">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aviladevops.com.br/">
+    <meta property="og:title" content="{% block title %}{{ title }}{% endblock %}">
+    <meta property="og:description" content="{% block description %}{{ description }}{% endblock %}">
+    <meta property="og:image" content="https://aviladevops.com.br/static/images/og-image.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://aviladevops.com.br/">
+    <meta property="twitter:title" content="{% block title %}{{ title }}{% endblock %}">
+    <meta property="twitter:description" content="{% block description %}{{ description }}{% endblock %}">
+    <meta property="twitter:image" content="https://aviladevops.com.br/static/images/og-image.jpg">
+
+    <title>{% block title %}{{ title }}{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- AOS Animation -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="preloader-content">
+            <div class="logo-preloader">
+                <i class="fas fa-code"></i>
+            </div>
+            <div class="loading-text">Carregando...</div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="{% url 'core:index' %}">
+                    <img src="{% static 'images/logo.png' %}" alt="Ávila DevOps Logo">
+                    <span>Ávila DevOps</span>
+                </a>
+            </div>
+
+            <div class="nav-menu" id="nav-menu">
+                <a href="{% url 'core:index' %}" class="nav-link">Início</a>
+                <a href="{% url 'core:services' %}" class="nav-link">Serviços</a>
+                <a href="{% url 'core:portfolio' %}" class="nav-link">Portfólio</a>
+                <a href="{% url 'core:about' %}" class="nav-link">Sobre</a>
+                <a href="#contact" class="nav-link">Contato</a>
+            </div>
+
+            <div class="nav-actions">
+                <a href="#contact" class="btn btn-primary">Fale Conosco</a>
+                <button class="nav-toggle" id="nav-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="{% static 'images/logo-white.png' %}" alt="Ávila DevOps">
+                        <p>Transformando ideias em soluções tecnológicas excepcionais desde 2014.</p>
+                    </div>
+                    <div class="footer-social">
+                        <a href="https://linkedin.com/company/avila-devops" target="_blank"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://github.com/avila-devops" target="_blank"><i class="fab fa-github"></i></a>
+                        <a href="https://instagram.com/avila.devops" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="https://youtube.com/@aviladevops" target="_blank"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Serviços</h4>
+                    <ul>
+                        <li><a href="{% url 'core:services' %}">Desenvolvimento Web</a></li>
+                        <li><a href="{% url 'core:services' %}">DevOps & Cloud</a></li>
+                        <li><a href="{% url 'core:services' %}">Consultoria em TI</a></li>
+                        <li><a href="{% url 'core:services' %}">Aplicativos Mobile</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="{% url 'core:about' %}">Sobre Nós</a></li>
+                        <li><a href="{% url 'core:portfolio' %}">Portfólio</a></li>
+                        <li><a href="#">Carreiras</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Contato</h4>
+                    <div class="contact-info">
+                        <p><i class="fas fa-envelope"></i> dev@aviladevops.com.br</p>
+                        <p><i class="fab fa-whatsapp"></i> +55 17 99781-1471</p>
+                        <p><i class="fas fa-map-marker-alt"></i> São José do Rio Preto, SP</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2024 Ávila DevOps. Todos os direitos reservados.</p>
+                    <div class="footer-links">
+                        <a href="#">Política de Privacidade</a>
+                        <a href="#">Termos de Uso</a>
+                        <a href="#">Cookies</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

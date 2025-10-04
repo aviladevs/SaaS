@@ -1,0 +1,74 @@
+{
+  "expo": {
+    "name": "Ávila DevOps SaaS",
+    "slug": "avila-devops-saas",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#007AFF"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "br.com.aviladevops.saas",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Use Face ID para autenticação rápida e segura",
+        "NSFingerprintUsageDescription": "Use Touch ID para autenticação rápida e segura",
+        "NSCameraUsageDescription": "Acesso à câmera para escanear códigos QR",
+        "NSMicrophoneUsageDescription": "Acesso ao microfone para comandos de voz"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#007AFF"
+      },
+      "package": "br.com.aviladevops.saas",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "USE_FINGERPRINT",
+        "USE_BIOMETRIC",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "VIBRATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-local-authentication",
+      "expo-camera",
+      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#007AFF",
+          "sounds": ["./assets/notification-sound.wav"]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "avila-devops-saas-project-id"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/avila-devops-saas-project-id"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    }
+  }
+}
