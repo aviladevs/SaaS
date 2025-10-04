@@ -146,7 +146,7 @@ jobs:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
     - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
+      uses: google-github-actions/setup-gcloud@v3
 
     - name: Configure Docker
       run: |
@@ -246,7 +246,7 @@ jobs:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
     - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
+      uses: google-github-actions/setup-gcloud@v3
 
     - name: Deploy Landing Page to App Engine
       run: |
@@ -270,7 +270,7 @@ jobs:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
     - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
+      uses: google-github-actions/setup-gcloud@v3
 
     - name: Run migrations for each service
       run: |
@@ -337,7 +337,7 @@ jobs:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
     - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
+      uses: google-github-actions/setup-gcloud@v3
 
     - name: Rollback to previous version
       run: |
