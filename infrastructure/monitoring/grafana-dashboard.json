@@ -1,0 +1,359 @@
+{
+  "dashboard": {
+    "title": "Ávila DevOps SaaS - High Load Performance",
+    "tags": ["saas", "performance", "high-load"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[1m]))",
+            "legendFormat": "Total Requests/s",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(http_requests_total{status=~\"5..\"}[1m]))",
+            "legendFormat": "Errors/s",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/s"},
+          {"format": "short"}
+        ],
+        "thresholds": [
+          {"value": 1000, "colorMode": "critical", "op": "lt", "fill": true, "line": true}
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Response Time (p50, p95, p99)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p99",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {"format": "ms", "label": "Response Time"},
+          {"format": "short"}
+        ],
+        "thresholds": [
+          {"value": 300, "colorMode": "critical", "op": "gt", "fill": false, "line": true}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "(sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))) * 100",
+            "legendFormat": "Error Rate %",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Error Rate", "max": 5},
+          {"format": "short"}
+        ],
+        "thresholds": [
+          {"value": 1, "colorMode": "critical", "op": "gt", "fill": true, "line": true}
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Active Pods by Service",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "sum(kube_pod_status_phase{phase=\"Running\",namespace=\"aviladevops-saas\"}) by (app)",
+            "legendFormat": "{{app}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Pod Count"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "CPU Usage by Service",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"aviladevops-saas\"}[5m])) by (pod) * 100",
+            "legendFormat": "{{pod}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "CPU Usage"},
+          {"format": "short"}
+        ],
+        "thresholds": [
+          {"value": 70, "colorMode": "warning", "op": "gt", "fill": false, "line": true},
+          {"value": 90, "colorMode": "critical", "op": "gt", "fill": false, "line": true}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Memory Usage by Service",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "(sum(container_memory_working_set_bytes{namespace=\"aviladevops-saas\"}) by (pod) / sum(container_spec_memory_limit_bytes{namespace=\"aviladevops-saas\"}) by (pod)) * 100",
+            "legendFormat": "{{pod}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Memory Usage"},
+          {"format": "short"}
+        ],
+        "thresholds": [
+          {"value": 80, "colorMode": "warning", "op": "gt", "fill": false, "line": true},
+          {"value": 95, "colorMode": "critical", "op": "gt", "fill": false, "line": true}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Database Connections (PgBouncer)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "sum(pgbouncer_pools_cl_active)",
+            "legendFormat": "Active Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(pgbouncer_pools_cl_waiting)",
+            "legendFormat": "Waiting Connections",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(pgbouncer_pools_cl_max)",
+            "legendFormat": "Max Connections",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Connections"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Redis Operations/sec",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "sum(rate(redis_commands_total[1m])) by (instance)",
+            "legendFormat": "{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Operations/s"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Cache Hit Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32},
+        "targets": [
+          {
+            "expr": "(rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))) * 100",
+            "legendFormat": "Redis Hit Rate %",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(cache_hits_total[5m])) / (sum(rate(cache_hits_total[5m])) + sum(rate(cache_misses_total[5m]))) * 100",
+            "legendFormat": "Application Cache Hit Rate %",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Hit Rate"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Nginx Active Connections",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32},
+        "targets": [
+          {
+            "expr": "nginx_connections_active",
+            "legendFormat": "Active Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "nginx_connections_reading",
+            "legendFormat": "Reading",
+            "refId": "B"
+          },
+          {
+            "expr": "nginx_connections_writing",
+            "legendFormat": "Writing",
+            "refId": "C"
+          },
+          {
+            "expr": "nginx_connections_waiting",
+            "legendFormat": "Waiting",
+            "refId": "D"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Connections"},
+          {"format": "short"}
+        ],
+        "thresholds": [
+          {"value": 6553, "colorMode": "warning", "op": "gt", "fill": false, "line": true},
+          {"value": 7372, "colorMode": "critical", "op": "gt", "fill": false, "line": true}
+        ]
+      },
+      {
+        "id": 11,
+        "title": "PostgreSQL Query Duration (p95)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 40},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(pg_stat_statements_total_time_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p95 Query Duration",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ms", "label": "Duration"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 12,
+        "title": "System Success Rate",
+        "type": "singlestat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 40},
+        "targets": [
+          {
+            "expr": "(1 - (sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])))) * 100",
+            "refId": "A"
+          }
+        ],
+        "format": "percent",
+        "thresholds": "99,99.5,100",
+        "colors": ["#d44a3a", "#e0b400", "#299c46"],
+        "valueName": "current"
+      },
+      {
+        "id": 13,
+        "title": "Current Request Rate",
+        "type": "singlestat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 40},
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[1m]))",
+            "refId": "A"
+          }
+        ],
+        "format": "reqps",
+        "thresholds": "800,1000,1500",
+        "colors": ["#d44a3a", "#e0b400", "#299c46"],
+        "valueName": "current",
+        "postfix": " req/s"
+      },
+      {
+        "id": 14,
+        "title": "HPA Status",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 44},
+        "targets": [
+          {
+            "expr": "kube_horizontalpodautoscaler_status_current_replicas",
+            "format": "table",
+            "refId": "A"
+          },
+          {
+            "expr": "kube_horizontalpodautoscaler_spec_min_replicas",
+            "format": "table",
+            "refId": "B"
+          },
+          {
+            "expr": "kube_horizontalpodautoscaler_spec_max_replicas",
+            "format": "table",
+            "refId": "C"
+          },
+          {
+            "expr": "kube_horizontalpodautoscaler_status_desired_replicas",
+            "format": "table",
+            "refId": "D"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "namespace",
+          "type": "constant",
+          "current": {
+            "value": "aviladevops-saas"
+          }
+        },
+        {
+          "name": "datasource",
+          "type": "datasource",
+          "query": "prometheus"
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "tags": ["deployment"]
+        }
+      ]
+    }
+  }
+}

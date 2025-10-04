@@ -421,6 +421,131 @@ trivy image app-image:latest
 zap-baseline.py -t http://localhost:8000
 ```
 
+## 🚀 High-Load Architecture (1000+ req/s)
+
+### **Performance Targets**
+- **Current Capacity**: ~330 req/s
+- **Target Capacity**: 1000+ req/s
+- **Stretch Goal**: 1500 req/s
+- **Response Time**: <300ms (p95)
+- **Error Rate**: <1%
+
+### **Infrastructure Optimizations**
+
+#### **Nginx Configuration**
+```nginx
+# Key optimizations implemented
+worker_connections 8192;              # Increased from 2048
+keepalive 64;                         # Connection pooling per upstream
+limit_req_zone ... rate=500r/s;       # Optimized rate limiting
+proxy_cache api_cache;                # Intelligent caching
+```
+
+**Features:**
+- 5 backend instances per service
+- Smart proxy caching (5-minute TTL for GET requests)
+- Static file caching (1-year expiry)
+- HTTP/2 with connection reuse
+
+#### **Kubernetes Auto-scaling**
+```yaml
+# HPA Configuration per service
+minReplicas: 10                       # Increased from 3
+maxReplicas: 50                       # Increased from 10
+targetCPUUtilization: 70%
+targetMemoryUtilization: 80%
+```
+
+**Scale-up Policy:**
+- Add 50% or 5 pods per minute (whichever is larger)
+- Stabilization window: 60 seconds
+
+**Scale-down Policy:**
+- Remove 10% per minute
+- Stabilization window: 300 seconds
+
+#### **Database High-Availability**
+
+**PostgreSQL Configuration:**
+- 1 Master instance (2Gi memory, 2 CPU)
+- 2 Read Replicas (1Gi memory, 1 CPU each)
+- PgBouncer connection pooling:
+  - Max client connections: 10,000
+  - Default pool size: 100 per database
+  - Pool mode: transaction-level
+
+**Performance Settings:**
+```sql
+max_connections = 500
+shared_buffers = 256MB
+effective_cache_size = 1GB
+work_mem = 16MB
+```
+
+#### **Redis Cluster**
+- 6 Redis instances in cluster mode
+- 2GB memory per instance
+- Configured for high availability
+- LRU eviction policy
+- AOF persistence enabled
+
+### **Monitoring Stack**
+
+#### **Prometheus Metrics**
+- Request rate and latency tracking
+- Error rate monitoring
+- Database connection pool metrics
+- Redis operations tracking
+- Pod CPU/Memory utilization
+
+#### **Grafana Dashboards**
+- Real-time performance overview
+- Service-level metrics
+- Database and cache performance
+- Alert visualization
+
+#### **Alert Rules**
+- High error rate (>1%)
+- High response time (p95 >300ms)
+- Database connection pool exhaustion
+- Redis memory pressure
+- HPA max replicas reached
+
+### **Load Testing**
+
+Automated load testing with k6:
+```bash
+# Run load test
+cd scripts/setup
+BASE_URL=https://your-domain.com ./run-load-tests.sh
+```
+
+**Test Stages:**
+1. Warm-up: 0 → 300 users (5 min)
+2. Baseline: 500 users (15 min)
+3. Target: 1000 users (13 min)
+4. Stress: 1500 users (7 min)
+5. Cool-down: 1500 → 0 users (4 min)
+
+### **Deployment Guide**
+
+Complete high-load deployment instructions available in:
+- [📖 Infrastructure README](../infrastructure/README.md)
+- [🚀 Deployment Guide](../infrastructure/DEPLOYMENT.md)
+
+**Quick Start:**
+```bash
+# 1. Apply Kubernetes configuration
+kubectl apply -f infrastructure/kubernetes/saas-high-load.yaml
+
+# 2. Deploy Nginx configuration
+sudo cp infrastructure/nginx/saas.high-load.conf /etc/nginx/nginx.conf
+sudo nginx -s reload
+
+# 3. Run load tests
+./scripts/setup/run-load-tests.sh
+```
+
 ## 📚 Recursos e Links
 
 ### **Documentação Técnica**
@@ -428,12 +553,14 @@ zap-baseline.py -t http://localhost:8000
 - [☸️ Kubernetes Configs](./kubernetes/)
 - [🏗️ Terraform Infra](./terraform/)
 - [📊 Monitoring Setup](./monitoring/)
+- [🚀 High-Load Infrastructure](../infrastructure/)
 
 ### **Ferramentas e Serviços**
 - [🔧 Django Admin](https://docs.djangoproject.com/en/stable/ref/contrib/admin/)
 - [📖 Django REST Framework](https://www.django-rest-framework.org/)
 - [⚛️ Next.js Docs](https://nextjs.org/docs)
 - [☁️ Google Cloud](https://cloud.google.com/docs)
+- [📈 k6 Load Testing](https://k6.io/docs/)
 
 ### **Comunidade**
 - [💬 Discord Dev](https://discord.gg/avila-devops-dev)
