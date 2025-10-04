@@ -1,0 +1,123 @@
+# Ávila DevOps SaaS - Main Application Dockerfile (Production Optimized)
+# Dockerfile otimizado para produção baseado no feedback
+
+FROM python:3.11-slim as builder
+
+# Instalar dependências de sistema para compilação
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    libffi-dev \
+    libssl-dev \
+    libjpeg-dev \
+    libpng-dev \
+    zlib1g-dev \
+    libfreetype6-dev \
+    liblcms2-dev \
+    libopenjp2-7-dev \
+    libtiff5-dev \
+    libwebp-dev \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Definir variáveis de ambiente
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Criar usuário não-root
+RUN groupadd -g 1000 django && useradd -u 1000 -g django django
+
+# Definir diretório de trabalho
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY requirements*.txt ./
+
+# Instalar dependências Python
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Stage 2: Production
+FROM python:3.11-slim as production
+
+# Instalar dependências de runtime
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    libffi7 \
+    libssl3 \
+    libjpeg62-turbo \
+    libpng16-16 \
+    zlib1g \
+    libfreetype6 \
+    liblcms2-2 \
+    libopenjp2-7 \
+    libtiff5 \
+    libwebp6 \
+    curl \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Criar usuário não-root
+RUN groupadd -g 1000 django && useradd -u 1000 -g django django
+
+# Definir variáveis de ambiente para produção
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/home/django/.local/bin:${PATH}" \
+    DJANGO_SETTINGS_MODULE=core.settings \
+    ENVIRONMENT=production \
+    SERVICE_NAME=main-app
+
+# Definir diretório de trabalho
+WORKDIR /app
+
+# Copiar dependências instaladas do builder
+COPY --from=builder /home/django/.local /home/django/.local
+
+# Criar diretórios necessários com permissões corretas
+RUN mkdir -p /app/staticfiles /app/media /app/logs /app/backups /app/temp && \
+    chown -R django:django /app && \
+    chmod -R 755 /app/staticfiles /app/media /app/logs /app/backups /app/temp
+
+# Copiar código da aplicação
+COPY --chown=django:django . .
+
+# Instalar scripts de inicialização
+COPY --chown=django:django scripts/production-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/production-entrypoint.sh
+
+# Mudar para usuário não-root
+USER django
+
+# Coletar arquivos estáticos (será feito novamente pelo entrypoint se necessário)
+RUN python manage.py collectstatic --noinput
+
+# Executar migrações (serão verificadas pelo entrypoint)
+RUN python manage.py migrate --noinput
+
+# Expor porta
+EXPOSE 8000
+
+# Health check otimizado
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/health/ || exit 1
+
+# Comando para produção com entrypoint otimizado
+ENTRYPOINT ["production-entrypoint.sh"]
+CMD ["gunicorn", \
+     "--bind", "0.0.0.0:8000", \
+     "--chdir", "/app", \
+     "--workers", "4", \
+     "--threads", "2", \
+     "--worker-class", "gthread", \
+     "--worker-connections", "1000", \
+     "--max-requests", "1000", \
+     "--max-requests-jitter", "50", \
+     "--keep-alive", "5", \
+     "--log-level", "info", \
+     "--access-logformat", "%(h)s %(l)s %(u)s %(t)s \"%(r)s\" %(s)s %(b)s \"%(f)s\" \"%(a)s\" %(D)s", \
+     "--preload", \
+     "--pid", "/tmp/gunicorn.pid", \
+     "core.wsgi:application"]

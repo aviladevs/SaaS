@@ -1,0 +1,393 @@
+version: '3.8'
+
+services:
+  # Landing Page - Serviço público
+  landing-page:
+    build:
+      context: ./LANDING-PAGE
+      dockerfile: Dockerfile.prod
+    command: gunicorn --bind 0.0.0.0:8000 --chdir /app core.wsgi:application
+    volumes:
+      - landing_page_static:/app/staticfiles:ro
+      - landing_page_media:/app/media:ro
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - DEBUG=False
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Sistema de Reciclagem - Serviço interno
+  recycling-system:
+    build:
+      context: ./sistema
+      dockerfile: Dockerfile.prod
+    command: gunicorn --bind 0.0.0.0:8000 --chdir /app core.wsgi:application
+    volumes:
+      - sistema_static:/app/staticfiles:ro
+      - sistema_media:/app/media:ro
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - DEBUG=False
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Sistema Fiscal - Serviço interno
+  fiscal-system:
+    build:
+      context: ./fiscal
+      dockerfile: Dockerfile.prod
+    command: gunicorn --bind 0.0.0.0:8000 --chdir /app core.wsgi:application
+    volumes:
+      - fiscal_static:/app/staticfiles:ro
+      - fiscal_media:/app/media:ro
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - DEBUG=False
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Clínica Management - Serviço público
+  clinica-system:
+    build:
+      context: ./clinica
+      dockerfile: Dockerfile.prod
+    volumes:
+      - clinica_static:/app/.next/static:ro
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    networks:
+      - saas-network
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Aplicação Principal (Admin) - Serviço interno
+  main-app:
+    build:
+      context: ./app-aviladevops
+      dockerfile: Dockerfile.prod
+    command: gunicorn --bind 0.0.0.0:8000 --chdir /app core.wsgi:application
+    volumes:
+      - main_app_static:/app/staticfiles:ro
+      - main_app_media:/app/media:ro
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - DEBUG=False
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Banco de dados PostgreSQL
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    environment:
+      - POSTGRES_DB=aviladevops_saas
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    networks:
+      - saas-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+
+  # Redis para cache e sessões
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    networks:
+      - saas-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Nginx - Load Balancer e Proxy Reverso
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/saas.prod.conf:/etc/nginx/conf.d/default.conf
+      - ./ssl:/etc/nginx/ssl:ro
+      - landing_page_static:/app/landing-page/staticfiles:ro
+      - sistema_static:/app/sistema/staticfiles:ro
+      - fiscal_static:/app/fiscal/staticfiles:ro
+      - main_app_static:/app/main-app/staticfiles:ro
+    depends_on:
+      - landing-page
+      - recycling-system
+      - fiscal-system
+      - clinica-system
+      - main-app
+    networks:
+      - saas-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Celery Worker para tarefas assíncronas
+  celery-worker:
+    build:
+      context: ./app-aviladevops
+      dockerfile: Dockerfile.prod
+    command: celery -A core worker --loglevel=info --concurrency=2
+    volumes:
+      - main_app_media:/app/media
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - db
+      - redis
+      - main-app
+    networks:
+      - saas-network
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Celery Beat para tarefas agendadas
+  celery-beat:
+    build:
+      context: ./app-aviladevops
+      dockerfile: Dockerfile.prod
+    command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+      - ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - saas-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Elasticsearch para busca avançada
+  elasticsearch:
+    image: elasticsearch:8.8.2
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "indices.query.bool.max_clause_count=10000"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - saas-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+
+  # Logstash para processamento de logs
+  logstash:
+    image: logstash:8.8.2
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./logstash/config:/usr/share/logstash/config:ro
+    environment:
+      - LS_JAVA_OPTS=-Xmx256m -Xms256m
+    networks:
+      - saas-network
+    depends_on:
+      - elasticsearch
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  landing_page_static:
+    driver: local
+  landing_page_media:
+    driver: local
+  sistema_static:
+    driver: local
+  sistema_media:
+    driver: local
+  fiscal_static:
+    driver: local
+  fiscal_media:
+    driver: local
+  main_app_static:
+    driver: local
+  main_app_media:
+    driver: local
+  clinica_static:
+    driver: local
+
+networks:
+  saas-network:
+    driver: overlay
+    attachable: true
